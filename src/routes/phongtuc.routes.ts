@@ -4,7 +4,8 @@ import {
   getNoiBatPhongTuc,
   getPhoBienPhongTuc,
   createPhongTuc,
-  updatePhongTuc
+  updatePhongTuc,
+  getPhongTucXemNhieu,
 } from '../controllers/phongtuc.controller';
 
 const router = express.Router();
@@ -14,5 +15,6 @@ router.get('/noibat', getNoiBatPhongTuc);
 router.get('/phobien', getPhoBienPhongTuc);
 router.post('/', createPhongTuc);
 router.patch('/:id', updatePhongTuc);
+router.get("/xemnhieu", getPhongTucXemNhieu);
 
 export default router;

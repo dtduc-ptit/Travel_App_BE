@@ -13,7 +13,14 @@ export const getAllPhongTuc = async (req: Request, res: Response) => {
 
 export const getNoiBatPhongTuc = async (req: Request, res: Response) => {
   try {
-    const phongTucs = await PhongTuc.find({ danhGia: { $gte: 4 } });
+    const { diaDiem } = req.query;
+
+    const filter: any = { danhGia: { $gte: 4 } };
+    if (diaDiem) {
+      filter.diaDiem = diaDiem;
+    }
+
+    const phongTucs = await PhongTuc.find(filter);
     const phongTucIds = phongTucs.map(pt => pt._id);
 
     const medias = await Media.find({
@@ -38,6 +45,7 @@ export const getNoiBatPhongTuc = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Lỗi khi lấy danh sách phong tục nổi bật' });
   }
 };
+
 
 export const getPhoBienPhongTuc = async (req: Request, res: Response) => {
   try {
@@ -174,5 +182,35 @@ export const updatePhongTuc = async (req: Request, res: Response): Promise<void>
   } catch (err) {
     console.error('❌ Lỗi khi cập nhật PhongTuc:', err);
     res.status(500).json({ error: 'Lỗi khi cập nhật phong tục' });
+  }
+};
+
+
+export const getPhongTucXemNhieu = async (req: Request, res: Response) => {
+  try {
+    const phongTucs = await PhongTuc.find({ luotXem: { $gt: 200 } }).sort({ luotXem: -1 });
+
+    const phongTucIds = phongTucs.map(pt => pt._id);
+
+    const medias = await Media.find({
+      doiTuong: "PhongTuc",
+      doiTuongId: { $in: phongTucIds },
+      type: "image",
+    });
+
+    const mediaMap = new Map();
+    medias.forEach(media => {
+      mediaMap.set(media.doiTuongId.toString(), media.url);
+    });
+
+    const result = phongTucs.map(pt => ({
+      ...pt.toObject(),
+      imageUrl: mediaMap.get(pt._id.toString()) || null,
+    }));
+
+    res.json(result);
+  } catch (error) {
+    console.error("Lỗi khi lấy phong tục xem nhiều:", error);
+    res.status(500).json({ error: "Lỗi server" });
   }
 };
