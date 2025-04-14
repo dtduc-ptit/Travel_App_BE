@@ -42,10 +42,12 @@ const lichTrinhSchema = new mongoose.Schema({
   suKien: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'SuKien',
+    default: null,
   },
   diTich: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'DiTich',
+    ref: 'DTTich',
+    default: null,
   },
   hoatDongs: {
     type: [hoatDongSchema],
@@ -56,6 +58,29 @@ const lichTrinhSchema = new mongoose.Schema({
       message: 'Cần ít nhất một hoạt động trong lịch trình',
     },
   },
+}, {
+  validateBeforeSave: true,
+});
+
+// 👇 Custom validation: chỉ có 1 trong 2 trường suKien hoặc diTich
+lichTrinhSchema.pre('validate', function (next) {
+  const hasSuKien = !!this.suKien;
+  const hasDiTich = !!this.diTich;
+
+  if ((hasSuKien && hasDiTich) || (!hasSuKien && !hasDiTich)) {
+    const error = new mongoose.Error.ValidationError(this as any);
+    error.addError('suKien', new mongoose.Error.ValidatorError({
+      message: 'Chỉ được chọn 1 trong 2: sự kiện hoặc di tích',
+      path: 'suKien',
+    }));
+    error.addError('diTich', new mongoose.Error.ValidatorError({
+      message: 'Chỉ được chọn 1 trong 2: sự kiện hoặc di tích',
+      path: 'diTich',
+    }));
+    return next(error);
+  }
+
+  next();
 });
 
 export const LichTrinh = mongoose.model('LichTrinh', lichTrinhSchema);

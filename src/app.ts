@@ -8,6 +8,7 @@ import phongtucRoutes from './routes/phongtuc.routes';
 import mediaRoutes from './routes/media.routes';
 import nguoidungRoutes from './routes/nguoidung.routes';
 import ditichRoutes from './routes/ditich.routes';
+import lichtrinhRoutes from './routes/lichtrinh.routes';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use('/api/phongtucs', phongtucRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/nguoidung', nguoidungRoutes);
 app.use('/api/ditich', ditichRoutes);
+app.use('/api/lichtrinh', lichtrinhRoutes); 
 
 // Route test
 app.get('/', (req, res) => {
