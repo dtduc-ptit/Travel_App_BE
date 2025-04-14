@@ -214,3 +214,53 @@ export const getPhongTucXemNhieu = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Lỗi server" });
   }
 };
+
+// GET /api/phongtucs/:id
+export const getPhongTucById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const phongTuc = await PhongTuc.findById(id);
+    if (!phongTuc) {
+      res.status(404).json({ error: "Không tìm thấy phong tục" });
+      return;
+    }
+
+    const media = await Media.findOne({
+      doiTuong: "PhongTuc",
+      doiTuongId: id,
+      type: "image",
+    });
+
+    const result = {
+      ...phongTuc.toObject(),
+      imageUrl: media?.url || null,
+    };
+
+    res.json(result);
+  } catch (error) {
+    console.error("Lỗi khi lấy chi tiết phong tục:", error);
+    res.status(500).json({ error: "Lỗi server" });
+  }
+};
+
+// PATCH /api/phongtucs/:id/luotxem
+export const tangLuotXemPhongTuc = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const phongTuc = await PhongTuc.findById(id);
+    if (!phongTuc) {
+      res.status(404).json({ error: 'Không tìm thấy phong tục' });
+      return;
+    }
+
+    phongTuc.luotXem = (phongTuc.luotXem || 0) + 1;
+    await phongTuc.save();
+
+    res.status(200).json({ success: true, luotXem: phongTuc.luotXem });
+  } catch (err) {
+    console.error('❌ Lỗi khi tăng lượt xem:', err);
+    res.status(500).json({ error: 'Lỗi server khi tăng lượt xem' });
+  }
+};
