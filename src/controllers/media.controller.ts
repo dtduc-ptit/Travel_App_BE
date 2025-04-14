@@ -38,3 +38,11 @@ export const createMedia = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({ error: 'Lỗi khi tạo media' });
   }
 };
+export const getAllMedia = async (req: Request, res: Response) => {
+  try {
+    const media = await Media.find();
+    res.json(media);
+  } catch (err) {
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách medias' });
+  }
+};
