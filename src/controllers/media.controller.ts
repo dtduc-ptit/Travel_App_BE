@@ -133,3 +133,35 @@ export const updateMedia = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({ error: "Lỗi khi cập nhật media" });
   }
 };
+
+
+export const getMediaByDoiTuong = async (req: Request, res: Response): Promise<void> => {
+try {
+  const { doiTuong, doiTuongId, type } = req.query;
+
+  // Kiểm tra các tham số bắt buộc
+  if (!doiTuong || !doiTuongId || !type) {
+    res.status(400).json({ error: "Thiếu thông tin doiTuong, doiTuongId hoặc type" });
+    return;
+  }
+
+  // Xác nhận loại đối tượng hợp lệ
+  const validTargets = ["PhongTuc", "SuKien", "DTTich"];
+  if (!validTargets.includes(String(doiTuong))) {
+    res.status(400).json({ error: "Loại đối tượng không hợp lệ" });
+    return;
+  }
+
+  // Truy vấn Media phù hợp
+  const mediaList = await Media.find({
+    doiTuong: doiTuong,
+    doiTuongId: doiTuongId,
+    type: type,
+  }).sort({ createdAt: -1 }); // sắp xếp mới nhất lên đầu
+
+  res.json(mediaList);
+} catch (err) {
+  console.error("❌ Lỗi khi lấy media theo đối tượng:", err);
+  res.status(500).json({ error: "Lỗi server khi lấy media" });
+}
+};
