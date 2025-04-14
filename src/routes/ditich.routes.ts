@@ -5,7 +5,9 @@ import {
   getPhoBienDiTich,
   createDiTich,
   updateDiTich,
-  getDiTichXemNhieu
+  getDiTichXemNhieu,
+  getDiTichById,
+  tangLuotXemDiTich
 } from '../controllers/ditich.controller';
 
 const router = express.Router();
@@ -24,5 +26,10 @@ router.post('/', createDiTich);
 
 // Cập nhật thông tin di tích
 router.patch('/:id', updateDiTich);
+
 router.get("/xemnhieu", getDiTichXemNhieu);
+
+router.get('/:id', getDiTichById);
+
+router.patch('/:id/luotxem', tangLuotXemDiTich);
 export default router;

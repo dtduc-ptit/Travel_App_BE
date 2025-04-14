@@ -18,38 +18,39 @@ export const getAllDiTich = async (req: Request, res: Response) => {
 
 export const getNoiBatDiTich = async (req: Request, res: Response) => {
   try {
-    const filter = req.query.diaDiem ? { diaDiem: req.query.diaDiem } : {};
+    const { diaDiem } = req.query;
 
-    const diTichList = await DTTich.find({
-      danhGia: { $gte: 4.5 },
-      ...filter,
-    });
+    const filter: any = { danhGia: { $gte: 4.5 } };
+    if (diaDiem) {
+      filter.diaDiem = diaDiem;
+    }
 
-    const ids = diTichList.map(dt => dt._id.toString());
+    const diTichList = await DTTich.find(filter);
+    const diTichIds = diTichList.map(dt => dt._id);
 
     const medias = await Media.find({
       doiTuong: 'DTTich',
-      doiTuongId: { $in: ids },
+      doiTuongId: { $in: diTichIds },
       type: 'image',
     });
 
-    const mediaMap = new Map<string, string>();
-    medias.forEach(m => {
-      mediaMap.set(m.doiTuongId, m.url);
+    const mediaMap = new Map();
+    medias.forEach(media => {
+      mediaMap.set(media.doiTuongId.toString(), media.url);
     });
 
     const result = diTichList.map(dt => ({
-      _id: dt._id,
-      ten: dt.ten,
-      imageUrl: mediaMap.get(dt._id.toString()) || '',
+      ...dt.toObject(),
+      imageUrl: mediaMap.get(dt._id.toString()) || null,
     }));
 
     res.json(result);
   } catch (error) {
-    console.error('Lỗi lấy di tích nổi bật:', error);
-    res.status(500).json({ error: 'Lỗi server' });
+    console.error("Lỗi khi lấy di tích nổi bật:", error);
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách di tích nổi bật' });
   }
 };
+
 
 export const getPhoBienDiTich = async (req: Request, res: Response) => {
   try {
@@ -207,5 +208,53 @@ export const updateDiTich = async (req: Request, res: Response) => {
   } catch (err) {
     console.error('❌ Lỗi khi cập nhật DiTich:', err);
     res.status(500).json({ error: 'Lỗi khi cập nhật di tích' });
+  }
+};
+
+export const getDiTichById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const ditich = await DTTich.findById(id);
+    if (!ditich) {
+      res.status(404).json({ error: "Không tìm thấy di tích" });
+      return;
+    }
+
+    const media = await Media.findOne({
+      doiTuong: "DTTich",
+      doiTuongId: id,
+      type: "image",
+    });
+
+    const result = {
+      ...ditich.toObject(),
+      imageUrl: media?.url || null,
+    };
+
+    res.json(result);
+  } catch (error) {
+    console.error("Lỗi khi lấy chi tiết di tích:", error);
+    res.status(500).json({ error: "Lỗi server" });
+  }
+};
+
+export const tangLuotXemDiTich = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const ditich = await DTTich.findById(id);
+    if (!ditich) {
+      res.status(404).json({ error: 'Không tìm thấy di tích' });
+      return;
+    }
+
+    ditich.luotXem = (ditich.luotXem || 0) + 1;
+    await ditich.save();
+
+    res.status(200).json({ success: true, luotXem: ditich.luotXem });
+  } catch (err) {
+    console.error('❌ Lỗi khi tăng lượt xem:', err);
+    res.status(500).json({ error: 'Lỗi server khi tăng lượt xem' });
   }
 };

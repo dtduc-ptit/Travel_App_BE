@@ -94,12 +94,29 @@ export const loginNguoiDung = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Optionally: create JWT token (nếu dùng auth)
-    // const token = jwt.sign({ id: nguoiDung._id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
-
-    res.status(200).json({ message: 'Đăng nhập thành công', nguoiDung /*, token */ });
+    res.status(200).json({
+      message: 'Đăng nhập thành công',
+      idNguoiDung: nguoiDung._id, // 👈 Gửi luôn ID người dùng
+      nguoiDung,
+    });
   } catch (error) {
     console.error('Lỗi đăng nhập:', error);
     res.status(500).json({ message: 'Lỗi server' });
+  }
+};
+
+
+// Lấy thông tin chi tiết người dùng theo ID
+export const getNguoiDungInfo = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const nguoiDung = await NguoiDung.findById(id);
+    if (!nguoiDung) {
+      return res.status(404).json({ message: "Người dùng không tồn tại" });
+    }
+    res.json(nguoiDung);
+  } catch (error) {
+    console.error("Lỗi khi lấy thông tin người dùng:", error);
+    res.status(500).json({ message: "Lỗi server" });
   }
 };
