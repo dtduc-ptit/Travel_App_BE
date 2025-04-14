@@ -18,11 +18,11 @@ export const getAllDiTich = async (req: Request, res: Response) => {
 
 export const getNoiBatDiTich = async (req: Request, res: Response) => {
   try {
-    const { diaDiem } = req.query;
+    const { viTri } = req.query;
 
     const filter: any = { danhGia: { $gte: 4.5 } };
-    if (diaDiem) {
-      filter.diaDiem = diaDiem;
+    if (viTri) {
+      filter.viTri = viTri;
     }
 
     const diTichList = await DTTich.find(filter);
@@ -113,7 +113,6 @@ export const createDiTich = async (req: Request, res: Response) => {
       viTri,
       lichSu,
       danhGia,
-      diaDiem,
       loai,
       huongDan,
       luotXem,
@@ -127,7 +126,6 @@ export const createDiTich = async (req: Request, res: Response) => {
       viTri,
       lichSu,
       danhGia,
-      diaDiem,
       loai,
       huongDan,
       luotXem,
@@ -169,7 +167,6 @@ export const updateDiTich = async (req: Request, res: Response) => {
       viTri,
       lichSu,
       danhGia,
-      diaDiem,
       loai,
       huongDan,
       noiDungLuuTru,
