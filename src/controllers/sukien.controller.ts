@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { SuKien } from '../models/sukien.model';
 import { Media } from '../models/media.model';
+import mongoose from "mongoose";
+
 
 export const getAllSuKien = async (req: Request, res: Response) => {
   try {
@@ -284,5 +286,85 @@ export const searchSuKienByTen = async (req: Request, res: Response): Promise<vo
   } catch (error) {
     console.error('❌ Lỗi khi tìm kiếm sự kiện:', error);
     res.status(500).json({ error: 'Lỗi khi tìm kiếm sự kiện' });
+  }
+};
+
+export const getSuKienSapDienRa = async (req: Request, res: Response) => {
+  try {
+    const today = new Date();
+
+    const suKiens = await SuKien.find().sort({ thoiGianBatDau: 1 });
+
+    // Chuyển đổi chuỗi thoiGianBatDau => Date để so sánh
+    const upcomingEvents = suKiens.filter(sk => {
+      const [day, month, year] = sk.thoiGianBatDau.split('/');
+      const eventDate = new Date(`${year}-${month}-${day}`);
+      return eventDate >= today;
+    });
+
+    const ids = upcomingEvents.map(sk => sk._id);
+
+    const medias = await Media.find({
+      doiTuong: 'SuKien',
+      doiTuongId: { $in: ids },
+      type: 'image',
+    });
+
+    const mediaMap = new Map();
+    medias.forEach(media => {
+      mediaMap.set(media.doiTuongId.toString(), media.url);
+    });
+
+    const result = upcomingEvents.map(sk => ({
+      ...sk.toObject(),
+      imageUrl: mediaMap.get(sk._id.toString()) || null,
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error("Lỗi khi lấy sự kiện sắp diễn ra:", err);
+    res.status(500).json({ error: 'Lỗi khi lấy sự kiện sắp diễn ra' });
+  }
+};
+export const getAllSuKienSorted = async (req: Request, res: Response) => {
+  try {
+    // Lấy toàn bộ sự kiện
+    const suKiens = await SuKien.find();
+
+    // Sắp xếp theo thời gian: chuyển string → Date để so sánh/sắp xếp
+    const sortedSuKiens = suKiens
+      .map(sk => {
+        const [day, month, year] = sk.thoiGianBatDau.split('/');
+        const eventDate = new Date(`${year}-${month}-${day}`);
+        return { ...sk.toObject(), eventDate };
+      })
+      .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime());
+
+    // Lấy danh sách ID
+    const ids = sortedSuKiens.map(sk => sk._id);
+
+    // Tìm media image của các sự kiện
+    const medias = await Media.find({
+      doiTuong: 'SuKien',
+      doiTuongId: { $in: ids },
+      type: 'image',
+    });
+
+    // Map media vào đúng sự kiện
+    const mediaMap = new Map();
+    medias.forEach(media => {
+      mediaMap.set(media.doiTuongId.toString(), media.url);
+    });
+
+    // Gắn imageUrl cho mỗi sự kiện
+    const result = sortedSuKiens.map(sk => ({
+      ...sk,
+      imageUrl: mediaMap.get(sk._id.toString()) || null,
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error("Lỗi khi lấy tất cả sự kiện:", err);
+    res.status(500).json({ error: 'Lỗi khi lấy tất cả sự kiện' });
   }
 };

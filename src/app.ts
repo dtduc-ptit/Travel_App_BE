@@ -10,7 +10,6 @@ import nguoidungRoutes from './routes/nguoidung.routes';
 import ditichRoutes from './routes/ditich.routes';
 import lichtrinhRoutes from './routes/lichtrinh.routes';
 import sukienRoutes from './routes/sukien.routes';
-
 dotenv.config();
 
 const app: Application = express();
@@ -23,8 +22,9 @@ app.use(express.json());
 // Kết nối MongoDB
 mongoose
   .connect(process.env.MONGO_URI as string)
-  .then(() => {
+  .then(async () => {
     console.log('✅ Connected to MongoDB successfully!');
+    
   })
   .catch((err: Error) => {
     console.error('❌ MongoDB connection error:', err.message);
