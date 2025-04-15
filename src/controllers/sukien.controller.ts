@@ -368,3 +368,50 @@ export const getAllSuKienSorted = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Lỗi khi lấy tất cả sự kiện' });
   }
 };
+
+export const danhGiaSuKien = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params; // ID sự kiện
+    const { diem, userId } = req.body; // Lấy điểm và userId từ body
+
+    console.log('SuKien ID:', id);
+    console.log('Điểm đánh giá:', diem);
+    console.log('UserId:', userId);
+
+    if (!diem || typeof diem !== 'number' || diem < 1 || diem > 5) {
+      res.status(400).json({ message: "Điểm đánh giá phải là số từ 1 đến 5" });
+      return;
+    }
+
+    const sukien = await SuKien.findById(id);
+    if (!sukien) {
+      res.status(404).json({ message: "Không tìm thấy sự kiện" });
+      return;
+    }
+
+    const userRating = sukien.danhGiaNguoiDung?.find((dg) => dg.userId === userId);
+    if (userRating) {
+      userRating.diem = diem;
+    } else {
+      sukien.danhGiaNguoiDung?.push({ userId, diem });
+    }
+
+    const totalRating = sukien.danhGiaNguoiDung?.reduce((sum, dg) => sum + dg.diem, 0) || 0;
+    const avgRating = totalRating / (sukien.danhGiaNguoiDung?.length || 1);
+
+    sukien.danhGia = avgRating;
+    sukien.soNguoiDanhGia = sukien.danhGiaNguoiDung?.length || 0;
+
+    await sukien.save();
+
+    res.status(200).json({
+      message: "Đánh giá sự kiện thành công",
+      danhGia: parseFloat(avgRating.toFixed(1)),
+      soNguoiDanhGia: sukien.soNguoiDanhGia,
+    });
+  } catch (error) {
+    const err = error as Error;
+    console.error("Lỗi đánh giá sự kiện:", err.message);
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+};

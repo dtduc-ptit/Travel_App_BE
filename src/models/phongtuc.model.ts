@@ -27,6 +27,26 @@ const phongTucSchema = new mongoose.Schema({
     min: [0, 'Đánh giá không hợp lệ'],
     max: [5, 'Đánh giá không vượt quá 5']
   },
+  soNguoiDanhGia: { 
+    type: Number, 
+    default: 0, // Số người đã đánh giá
+    min: [0, 'Số người đánh giá phải là số không âm']
+  },
+  danhGiaNguoiDung: [ // Mảng lưu trữ các đánh giá của người dùng
+    {
+      userId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true 
+      },
+      diem: { 
+        type: Number, 
+        required: true,
+        min: [0, 'Điểm đánh giá không hợp lệ'],
+        max: [5, 'Điểm đánh giá không vượt quá 5']
+      },
+    }
+  ],
   thoiGianCapNhat: { 
     type: Date,
     default: Date.now

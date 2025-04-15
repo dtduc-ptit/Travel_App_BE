@@ -111,10 +111,9 @@ export const createDiTich = async (req: Request, res: Response) => {
       ten,
       moTa,
       viTri,
-      lichSu,
       danhGia,
-      loai,
       huongDan,
+      soNguoiDanhGia,
       luotXem,
       noiDungLuuTru,
       media
@@ -124,10 +123,9 @@ export const createDiTich = async (req: Request, res: Response) => {
       ten,
       moTa,
       viTri,
-      lichSu,
       danhGia,
-      loai,
       huongDan,
+      soNguoiDanhGia,
       luotXem,
       thoiGianCapNhat: new Date(),
       noiDungLuuTru: noiDungLuuTru || null,
@@ -165,9 +163,7 @@ export const updateDiTich = async (req: Request, res: Response) => {
       ten,
       moTa,
       viTri,
-      lichSu,
       danhGia,
-      loai,
       huongDan,
       noiDungLuuTru,
       media
@@ -289,5 +285,58 @@ export const tangLuotXemDiTich = async (req: Request, res: Response): Promise<vo
   } catch (err) {
     console.error('❌ Lỗi khi tăng lượt xem:', err);
     res.status(500).json({ error: 'Lỗi server khi tăng lượt xem' });
+  }
+};
+
+export const danhGiaDiTich = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params; // ID di tích
+    const { diem, userId } = req.body; // Lấy cả điểm và userId
+
+    console.log('DiTich ID:', id);
+    console.log('Điểm đánh giá:', diem);
+    console.log('UserId:', userId);
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!diem || typeof diem !== 'number' || diem < 1 || diem > 5) {
+      res.status(400).json({ message: "Điểm đánh giá phải là số từ 1 đến 5" });
+      return;
+    }
+
+    // Tìm di tích
+    const ditich = await DTTich.findById(id);
+    if (!ditich) {
+      res.status(404).json({ message: "Không tìm thấy di tích" });
+      return;
+    }
+
+    // Kiểm tra người dùng đã đánh giá chưa
+    const userRating = ditich.danhGiaNguoiDung?.find((dg) => dg.userId === userId);
+    if (userRating) {
+      // Cập nhật lại điểm của người dùng
+      userRating.diem = diem;
+    } else {
+      // Nếu chưa có đánh giá của người dùng, thêm mới
+      ditich.danhGiaNguoiDung?.push({ userId, diem });
+    }
+
+    // Tính điểm trung bình mới
+    const totalRating = ditich.danhGiaNguoiDung?.reduce((sum, dg) => sum + dg.diem, 0) || 0;
+    const avgRating = totalRating / (ditich.danhGiaNguoiDung?.length || 1);
+
+    ditich.danhGia = avgRating;
+    ditich.soNguoiDanhGia = ditich.danhGiaNguoiDung?.length || 0;
+
+    await ditich.save();
+
+    res.status(200).json({
+      message: "Đánh giá thành công",
+      danhGia: parseFloat(avgRating.toFixed(1)),
+      soNguoiDanhGia: ditich.soNguoiDanhGia,
+    });
+  } catch (error) {
+    const err = error as Error;
+    console.error("Lỗi đánh giá:", err.message);
+    res.status(500).json({ message: "Lỗi server", error: err.message });
   }
 };

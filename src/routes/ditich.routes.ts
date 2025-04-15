@@ -8,7 +8,8 @@ import {
   getDiTichXemNhieu,
   getDiTichById,
   tangLuotXemDiTich,
-  searchDiTichByTen
+  searchDiTichByTen,
+  danhGiaDiTich  
 } from '../controllers/ditich.controller';
 
 const router = express.Router();
@@ -25,6 +26,6 @@ router.patch('/:id', updateDiTich);
 router.get("/xemnhieu", getDiTichXemNhieu);
 router.get('/:id', getDiTichById);
 router.get('/search', searchDiTichByTen);
-
+router.patch('/:id/danhgia', danhGiaDiTich);
 router.patch('/:id/luotxem', tangLuotXemDiTich);
 export default router;

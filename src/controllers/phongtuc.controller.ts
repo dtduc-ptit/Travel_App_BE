@@ -138,6 +138,7 @@ export const updatePhongTuc = async (req: Request, res: Response): Promise<void>
       yNghia,
       loai,
       danhGia,
+      soNguoiDanhGia,
       diaDiem,
       huongDan,
       noiDungLuuTru,
@@ -265,4 +266,64 @@ export const tangLuotXemPhongTuc = async (req: Request, res: Response): Promise<
   }
 };
 
+export const danhGiaPhongTuc = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params; // ID phong tục
+    const { diem, userId } = req.body; // Lấy cả điểm và userId
+
+    console.log('PhongTuc ID:', id);
+    console.log('Điểm đánh giá:', diem);
+    console.log('UserId:', userId);
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!diem || typeof diem !== 'number' || diem < 1 || diem > 5) {
+      res.status(400).json({ message: "Điểm đánh giá phải là số từ 1 đến 5" });
+      return;
+    }
+
+    // Tìm phong tục
+    const phongtuc = await PhongTuc.findById(id);
+    if (!phongtuc) {
+      res.status(404).json({ message: "Không tìm thấy phong tục" });
+      return;
+    }
+
+    // Kiểm tra người dùng đã đánh giá chưa
+    const userRating = phongtuc.danhGiaNguoiDung?.find((dg) => dg.userId.toString() === userId.toString());
+    
+    let isNewRating = false;
+
+    if (userRating) {
+      // Nếu người dùng đã đánh giá, chỉ cập nhật lại điểm của người dùng đó
+      userRating.diem = diem;
+    } else {
+      // Nếu chưa có đánh giá, thêm mới
+      phongtuc.danhGiaNguoiDung?.push({ userId, diem });
+      isNewRating = true;
+    }
+
+    // Tính điểm trung bình mới
+    const totalRating = phongtuc.danhGiaNguoiDung?.reduce((sum, dg) => sum + dg.diem, 0) || 0;
+    const avgRating = totalRating / (phongtuc.danhGiaNguoiDung?.length || 1);
+
+    phongtuc.danhGia = avgRating;
+
+    // Chỉ tăng số người đánh giá khi có đánh giá mới
+    if (isNewRating) {
+      phongtuc.soNguoiDanhGia = phongtuc.danhGiaNguoiDung?.length || 0;
+    }
+
+    await phongtuc.save();
+
+    res.status(200).json({
+      message: "Đánh giá thành công",
+      danhGia: parseFloat(avgRating.toFixed(1)),
+      soNguoiDanhGia: phongtuc.soNguoiDanhGia,
+    });
+  } catch (error) {
+    const err = error as Error;
+    console.error("Lỗi đánh giá:", err.message);
+    res.status(500).json({ message: "Lỗi server", error: err.message });
+  }
+};
 

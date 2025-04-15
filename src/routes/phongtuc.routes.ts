@@ -8,6 +8,7 @@ import {
   getPhongTucXemNhieu,
   getPhongTucById,
   tangLuotXemPhongTuc,
+  danhGiaPhongTuc,
 } from '../controllers/phongtuc.controller';
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.get('/noibat', getNoiBatPhongTuc);
 router.get('/phobien', getPhoBienPhongTuc);
 router.post('/', createPhongTuc);
 router.patch('/:id', updatePhongTuc);
+router.patch('/:id/danhgia', danhGiaPhongTuc);
 router.get("/xemnhieu", getPhongTucXemNhieu);
 router.get('/:id', getPhongTucById);
 // PATCH tăng lượt xem

@@ -10,7 +10,8 @@ import {
   tangLuotXemSuKien,
   searchSuKienByTen,
   getSuKienSapDienRa,
-  getAllSuKienSorted
+  getAllSuKienSorted,
+  danhGiaSuKien
 } from '../controllers/sukien.controller';
 
 const router = express.Router();
@@ -23,8 +24,10 @@ router.get("/sapdienra", getSuKienSapDienRa);
 router.get('/sapxepsukien', getAllSuKienSorted);
 router.get('/:id', getSuKienById);
 router.post('/', createSuKien);
+router.patch('/:id/danhgia', danhGiaSuKien);
 router.patch('/:id', updateSuKien);
 router.patch('/:id/luotxem', tangLuotXemSuKien);
 router.get('/search', searchSuKienByTen)
+
 
 export default router;

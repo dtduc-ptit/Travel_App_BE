@@ -1,16 +1,31 @@
 import mongoose, { Schema } from 'mongoose';
 
+export interface IDanhGiaNguoiDung {
+  userId: string;
+  diem: number;
+}
+
 export interface IDTTich {
   ten: string;
   moTa?: string;
   viTri?: string;
   danhGia: number;
   thoiGianCapNhat?: Date;
+  soNguoiDanhGia: number;
   luotXem: number;
   huongDan?: string;
   noiDungLuuTruId?: mongoose.Types.ObjectId;
   media: mongoose.Types.ObjectId[];
+  danhGiaNguoiDung?: IDanhGiaNguoiDung[];
 }
+
+const danhGiaNguoiDungSchema: Schema<IDanhGiaNguoiDung> = new Schema(
+  {
+    userId: { type: String, required: true },
+    diem: { type: Number, required: true, min: 1, max: 5 },
+  },
+  { _id: false }
+);
 
 const diTichSchema: Schema<IDTTich> = new Schema(
   {
@@ -41,6 +56,10 @@ const diTichSchema: Schema<IDTTich> = new Schema(
       type: Date,
       default: Date.now,
     },
+    soNguoiDanhGia: { 
+      type: Number, 
+      default: 0 
+    },
     luotXem: {
       type: Number,
       default: 0,
@@ -60,6 +79,7 @@ const diTichSchema: Schema<IDTTich> = new Schema(
         ref: 'Media',
       },
     ],
+    danhGiaNguoiDung: [danhGiaNguoiDungSchema],
   },
   {
     timestamps: true,
