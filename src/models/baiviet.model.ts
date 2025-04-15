@@ -1,7 +1,8 @@
 
-import { Schema, Types } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
+import { Types } from 'mongoose';
 
-export const BaiVietSchema = new Schema(
+const BaiVietSchema = new Schema(
   {
     // Tham chiếu người dùng viết bài
     nguoiDung: {
@@ -57,3 +58,5 @@ export const BaiVietSchema = new Schema(
     timestamps: true, // tự động tạo createdAt & updatedAt
   },
 );
+
+export const BaiViet = mongoose.model('BaiViet', BaiVietSchema);
