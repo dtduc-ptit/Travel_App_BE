@@ -235,6 +235,42 @@ export const getDiTichById = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: "Lỗi server" });
   }
 };
+export const searchDiTichByTen = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { q } = req.query;
+
+    if (!q || typeof q !== 'string') {
+      res.status(400).json({ error: 'Thiếu từ khóa tìm kiếm' });
+      return;
+    }
+
+    // Tìm các di tích có tên chứa chuỗi q (không phân biệt hoa thường)
+    const regex = new RegExp(q, 'i');
+    const ditichs = await DTTich.find({ ten: regex });
+
+    // Lấy media tương ứng
+    const ids = ditichs.map(dt => dt._id.toString());
+    const medias = await Media.find({
+      doiTuong: 'DTTich',
+      doiTuongId: { $in: ids },
+      type: 'image'
+    });
+
+    const mediaMap = new Map<string, string>();
+    medias.forEach(m => mediaMap.set(m.doiTuongId, m.url));
+
+    const result = ditichs.map(dt => ({
+      ...dt.toObject(),
+      imageUrl: mediaMap.get(dt._id.toString()) || null
+    }));
+
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Lỗi khi tìm kiếm di tích:', error);
+    res.status(500).json({ error: 'Lỗi khi tìm kiếm di tích' });
+  }
+};
+
 
 export const tangLuotXemDiTich = async (req: Request, res: Response): Promise<void> => {
   try {

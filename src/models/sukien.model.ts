@@ -14,11 +14,13 @@ const suKienSchema = new mongoose.Schema({
   thoiGianBatDau: {
     type: String,
     required: [true, 'Thời gian bắt đầu là bắt buộc'],
-    match: [/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/, 'Thời gian không hợp lệ (hh:mm hoặc hh:mm:ss)'],
+    match: [/^([0-2][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/, 'Thời gian không hợp lệ (dd/mm/yyyy)'],
+
   },
   thoiGianKetThuc: {
     type: String,
-    match: [/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/, 'Thời gian không hợp lệ (hh:mm hoặc hh:mm:ss)'],
+    match: [/^([0-2][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/, 'Thời gian không hợp lệ (dd/mm/yyyy)'],
+
   },
   thoiGianCapNhat: {
     type: String,

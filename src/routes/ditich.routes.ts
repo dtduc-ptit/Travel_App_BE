@@ -7,29 +7,24 @@ import {
   updateDiTich,
   getDiTichXemNhieu,
   getDiTichById,
-  tangLuotXemDiTich
+  tangLuotXemDiTich,
+  searchDiTichByTen
 } from '../controllers/ditich.controller';
 
 const router = express.Router();
-
 // Lấy toàn bộ di tích
 router.get('/', getAllDiTich);
-
 // Lấy di tích nổi bật
 router.get('/noibat', getNoiBatDiTich);
-
 // Lấy di tích phổ biến
 router.get('/phobien', getPhoBienDiTich);
-
 // Thêm di tích mới
 router.post('/', createDiTich);
-
 // Cập nhật thông tin di tích
 router.patch('/:id', updateDiTich);
-
 router.get("/xemnhieu", getDiTichXemNhieu);
-
 router.get('/:id', getDiTichById);
+router.get('/search', searchDiTichByTen);
 
 router.patch('/:id/luotxem', tangLuotXemDiTich);
 export default router;
