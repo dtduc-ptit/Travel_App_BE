@@ -30,4 +30,5 @@ const thongBaoSuKienSchema = new mongoose.Schema({
   }
 });
 
+
 export const ThongBaoSuKien = mongoose.model('ThongBaoSuKien', thongBaoSuKienSchema);

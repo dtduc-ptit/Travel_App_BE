@@ -1,55 +1,63 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.KienThucSchema = void 0;
-const mongoose_1 = require("mongoose");
-exports.KienThucSchema = new mongoose_1.Schema({
+exports.KienThuc = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
+const KienThucSchema = new mongoose_1.default.Schema({
     tieuDe: {
         type: String,
-        required: true,
+        required: [true, 'Tiêu đề là bắt buộc'],
         trim: true,
+        minlength: [5, 'Tiêu đề phải có ít nhất 5 ký tự'],
+        maxlength: [200, 'Tiêu đề không được dài quá 200 ký tự']
     },
     noiDung: {
         type: String,
-        required: true,
+        required: [true, 'Nội dung là bắt buộc'],
+        minlength: [20, 'Nội dung phải có ít nhất 20 ký tự']
     },
     moTaNgan: {
         type: String,
         default: '',
+        maxlength: [500, 'Mô tả ngắn không được quá 500 ký tự']
     },
     tacGia: {
-        type: mongoose_1.Types.ObjectId,
+        type: mongoose_1.default.Schema.Types.ObjectId,
         ref: 'NguoiDung',
-        required: true,
+        required: [true, 'Phải có tác giả']
     },
     hinhAnh: [
         {
-            type: String, // Đường dẫn ảnh hoặc URL
-        },
+            type: String,
+            validate: {
+                validator: function (value) {
+                    return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/.test(value); // URL hợp lệ
+                },
+                message: 'URL hình ảnh không hợp lệ'
+            }
+        }
     ],
     the: [
         {
-            type: String, // Tags như: “phuot”, “kinh-nghiem”, “du-lich-bui”
+            type: String,
             lowercase: true,
             trim: true,
-        },
+            minlength: [2, 'Thẻ phải có ít nhất 2 ký tự'],
+            maxlength: [30, 'Thẻ không được dài quá 30 ký tự']
+        }
     ],
     daDuyet: {
         type: Boolean,
-        default: false,
+        default: false
     },
     soLuotXem: {
         type: Number,
         default: 0,
+        min: [0, 'Số lượt xem không thể âm']
     },
 }, {
-    timestamps: true, // createdAt, updatedAt
+    timestamps: true,
 });
-// Trường	Ý nghĩa
-// tieuDe	Tiêu đề bài viết
-// noiDung	Nội dung đầy đủ
-// moTaNgan	Mô tả ngắn, dùng cho preview
-// tacGia	Liên kết đến người đăng
-// hinhAnh	Danh sách ảnh minh họa
-// the	Tags để dễ phân loại, tìm kiếm
-// daDuyet	Admin kiểm duyệt
-// soLuotXem	Đếm lượt đọc
+exports.KienThuc = mongoose_1.default.model('KienThuc', KienThucSchema);

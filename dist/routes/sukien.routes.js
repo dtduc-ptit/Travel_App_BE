@@ -1,0 +1,21 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const sukien_controller_1 = require("../controllers/sukien.controller");
+const router = express_1.default.Router();
+router.get('/', sukien_controller_1.getAllSuKien);
+router.get('/noibat', sukien_controller_1.getNoiBatSuKien);
+router.get('/phobien', sukien_controller_1.getPhoBienSuKien);
+router.get('/xemnhieu', sukien_controller_1.getSuKienXemNhieu);
+router.get("/sapdienra", sukien_controller_1.getSuKienSapDienRa);
+router.get('/sapxepsukien', sukien_controller_1.getAllSuKienSorted);
+router.get('/:id', sukien_controller_1.getSuKienById);
+router.post('/', sukien_controller_1.createSuKien);
+router.patch('/:id/danhgia', sukien_controller_1.danhGiaSuKien);
+router.patch('/:id', sukien_controller_1.updateSuKien);
+router.patch('/:id/luotxem', sukien_controller_1.tangLuotXemSuKien);
+router.get('/search', sukien_controller_1.searchSuKienByTen);
+exports.default = router;

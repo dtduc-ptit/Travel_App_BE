@@ -10,7 +10,10 @@ import nguoidungRoutes from './routes/nguoidung.routes';
 import ditichRoutes from './routes/ditich.routes';
 import lichtrinhRoutes from './routes/lichtrinh.routes';
 import sukienRoutes from './routes/sukien.routes';
+import thongBaoRoutes from './routes/thongbaosukien.routes';
 import kienThucRoutes from './routes/kienthuc.routes';
+import { createEventNotifications } from './utils/notificationScheduler';  // Import hàm
+
 dotenv.config();
 
 const app: Application = express();
@@ -25,7 +28,6 @@ mongoose
   .connect(process.env.MONGO_URI as string)
   .then(async () => {
     console.log('✅ Connected to MongoDB successfully!');
-    
   })
   .catch((err: Error) => {
     console.error('❌ MongoDB connection error:', err.message);
@@ -39,7 +41,7 @@ app.use('/api/ditich', ditichRoutes);
 app.use('/api/sukien', sukienRoutes);
 app.use('/api/lichtrinh', lichtrinhRoutes);
 app.use('/api/kienthuc', kienThucRoutes);
-
+app.use('/api/thongbao', thongBaoRoutes); 
 // Route test
 app.get('/', (req, res) => {
   res.send('🚀 API Travel đang chạy!');
@@ -56,6 +58,11 @@ for (const iface of Object.values(networkInterfaces)) {
     }
   }
 }
+
+// Gọi hàm createEventNotifications ngay khi server khởi động
+mongoose.connection.once('open', () => {
+  createEventNotifications();  // Gọi hàm tạo thông báo khi khởi động server
+});
 
 app.listen(Number(port), host, () => {
   console.log(`🚀 Server đang chạy tại http://${localIP}:${port}`);
