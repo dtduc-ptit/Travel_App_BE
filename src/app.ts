@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import os from 'os';
+import cron from 'node-cron';
+
 
 import phongtucRoutes from './routes/phongtuc.routes';
 import mediaRoutes from './routes/media.routes';
@@ -61,8 +63,18 @@ for (const iface of Object.values(networkInterfaces)) {
 
 // Gọi hàm createEventNotifications ngay khi server khởi động
 mongoose.connection.once('open', () => {
-  createEventNotifications();  // Gọi hàm tạo thông báo khi khởi động server
+  console.log('🟢 Kết nối DB thành công, bắt đầu chạy cron gửi thông báo...');
+
+  // ✅ Chạy ngay khi server khởi động
+  createEventNotifications();
+
+  // ✅ Thiết lập cron job chạy mỗi ngày lúc 0h (nửa đêm)
+  cron.schedule('0 0 * * *', async () => {
+    console.log('🔁 [CRON] Đang kiểm tra sự kiện để gửi thông báo...');
+    await createEventNotifications();
+  });
 });
+
 
 app.listen(Number(port), host, () => {
   console.log(`🚀 Server đang chạy tại http://${localIP}:${port}`);
