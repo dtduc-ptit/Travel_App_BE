@@ -9,7 +9,7 @@ const noiDungLuuTruSchema = new mongoose.Schema({
 
   loaiNoiDung: {
     type: String,
-    enum: ['SuKien', 'DiTich', 'PhongTuc'],
+    enum: ['SuKien', 'DiTich', 'PhongTuc', 'DiaDiem'],
     required: true,
   },
 
@@ -22,6 +22,10 @@ const noiDungLuuTruSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  moTa: {
+    type: String,
+    required: false,
+  }
 });
 
 export const NoiDungLuuTru = mongoose.model('NoiDungLuuTru', noiDungLuuTruSchema);

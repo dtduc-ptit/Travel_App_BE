@@ -15,6 +15,7 @@ import sukienRoutes from './routes/sukien.routes';
 import thongBaoRoutes from './routes/thongbaosukien.routes';
 import kienThucRoutes from './routes/kienthuc.routes';
 import timKiemRoutes from "./routes/timkiem.route";
+import noidungluutruRoutes from './routes/noidungluutru.routes'; 
 import { createEventNotifications } from './utils/notificationScheduler';  // Import hàm
 
 dotenv.config();
@@ -46,6 +47,7 @@ app.use('/api/lichtrinh', lichtrinhRoutes);
 app.use('/api/kienthuc', kienThucRoutes);
 app.use('/api/thongbao', thongBaoRoutes);
 app.use("/api/timkiem", timKiemRoutes);
+app.use('/api/noidungluutru', noidungluutruRoutes);
 
 // Route test
 app.get('/', (req, res) => {
