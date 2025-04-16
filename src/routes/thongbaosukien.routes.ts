@@ -9,6 +9,7 @@ const router = express.Router();
 
 // Quan trọng: Route cụ thể phải đặt TRƯỚC route có params động
 router.get('/chuadoc/:userId', getSoLuongThongBaoChuaDoc);
+
 router.patch(
     '/:idThongBao/doc',
     danhDauThongBaoDaDoc as unknown as express.RequestHandler
