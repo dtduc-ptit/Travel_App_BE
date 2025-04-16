@@ -1,95 +1,125 @@
-import { Request, Response } from 'express';
+import { Request, Response, RequestHandler, NextFunction } from 'express';
 import { BaiViet } from '../models/baiviet.model';
-import { NguoiDung } from '../models/nguoidung.model';
-import mongoose from 'mongoose';
 
-// Lấy tất cả bài viết
-export const getPosts = async (req: Request, res: Response) => {
+// POST /api/baiviet
+export const createBaiViet = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const posts = await BaiViet.find().populate('nguoiDung');
-    res.json(posts);
-  } catch (err) {
-    res.status(500).json({ error: 'Lỗi khi lấy bài viết' });
-  }
-};
+    const { nguoiDung, noiDung, hinhAnh } = req.body;
 
-// Lấy bài viết theo ID
-export const getPostById = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  try {
-    const post = await BaiViet.findById(id).populate('nguoiDung');
-    if (!post) {
-      res.status(404).json({ error: 'Bài viết không tồn tại' });
+    // Kiểm tra dữ liệu đầu vào
+    if (!nguoiDung || !noiDung || !hinhAnh) {
+      res.status(400).json({ error: 'Thiếu thông tin cần thiết' });
       return;
     }
-    res.json(post);
-  } catch (err) {
-    res.status(500).json({ error: 'Lỗi khi lấy bài viết theo ID' });
-  }
-};
 
-// Tạo bài viết mới
-export const createPost = async (req: Request, res: Response) => {
-  const { content, hinhAnh, video, nguoiDungId } = req.body;
-
-  if (!mongoose.Types.ObjectId.isValid(nguoiDungId)) {
-    return res.status(400).json({ error: 'Người dùng không hợp lệ' });
-  }
-
-  try {
-    const nguoiDung = await NguoiDung.findById(nguoiDungId);
-    if (!nguoiDung) {
-      return res.status(404).json({ error: 'Người dùng không tồn tại' });
-    }
-
-    const newPost = new BaiViet({
-      noiDung: content,
+    // Tạo mới bài viết
+    const baiViet = new BaiViet({
+      nguoiDung,
+      noiDung,
       hinhAnh,
-      video,
-      nguoiDung: nguoiDungId,
     });
 
-    const savedPost = await newPost.save();
-    res.status(201).json(savedPost);
+    // Lưu bài viết vào cơ sở dữ liệu
+    const savedBaiViet = await baiViet.save();
+
+    // Trả về bài viết vừa tạo
+    res.status(201).json(savedBaiViet);
   } catch (err) {
-    res.status(500).json({ error: 'Lỗi khi tạo bài viết' });
+    console.error('❌ Lỗi khi tạo bài viết:', err);
+    next(err);  // Gọi next để chuyển lỗi cho middleware lỗi
+  }
+};
+// GET /api/baiviet
+export const getDanhSachBaiViet = async (req: Request, res: Response) => {
+  try {
+    const baiVietList = await BaiViet.find()
+      .populate('nguoiDung', 'ten anhDaiDien')  // Populate thông tin người dùng
+      .sort({ thoiGian: -1 })  // Sắp xếp theo thời gian đăng bài (mới nhất lên đầu)
+      .limit(10);
+
+    res.json(baiVietList);
+  } catch (err) {
+    console.error('❌ Lỗi khi lấy danh sách bài viết:', err);
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách bài viết' });
   }
 };
 
-
-// Cập nhật bài viết
-export const updatePost = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { content, hinhAnh, nguoiDungId } = req.body;
+// GET /api/baiviet/:id
+export const getBaiVietById = async (req: Request, res: Response) => {
   try {
-    const post = await BaiViet.findById(id);
-    if (!post) {
+    const { id } = req.params;
+    const baiViet = await BaiViet.findById(id).populate('nguoiDung', 'ten anhDaiDien');
+    
+    if (!baiViet) {
+      res.status(404).json({ error: 'Không tìm thấy bài viết' });
+      return;
+    }
+
+    res.json(baiViet);
+  } catch (err) {
+    console.error('❌ Lỗi khi lấy chi tiết bài viết:', err);
+    res.status(500).json({ error: 'Lỗi khi lấy chi tiết bài viết' });
+  }
+};
+
+// PATCH /api/baiviet/:id
+export const updateBaiViet = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const baiViet = await BaiViet.findById(id);
+    if (!baiViet) {
       res.status(404).json({ error: 'Bài viết không tồn tại' });
       return;
     }
-    post.noiDung = content || post.noiDung;
-    post.hinhAnh = hinhAnh || post.hinhAnh;
-    post.nguoiDung = nguoiDungId || post.nguoiDung;
-    
-    const updatedPost = await post.save();
-    res.json(updatedPost);
+
+    Object.assign(baiViet, updateData);
+    const updatedBaiViet = await baiViet.save();
+
+    res.json(updatedBaiViet);
   } catch (err) {
+    console.error('❌ Lỗi khi cập nhật bài viết:', err);
     res.status(500).json({ error: 'Lỗi khi cập nhật bài viết' });
   }
 };
 
-// Xóa bài viết
-export const deletePost = async (req: Request, res: Response) => {
-  const { id } = req.params;
+// PATCH /api/baiviet/:id/luotthich
+export const tangLuotThichBaiViet = async (req: Request, res: Response) => {
   try {
-    const post = await BaiViet.findById(id);
-    if (!post) {
+    const { id } = req.params;
+    const baiViet = await BaiViet.findById(id);
+    if (!baiViet) {
       res.status(404).json({ error: 'Bài viết không tồn tại' });
       return;
     }
-    await post.deleteOne();
-    res.json({ message: 'Bài viết đã được xóa' });
+
+    baiViet.luotThich.push(req.body.luotThich);  // Giả sử luotThich là ID của người thích bài
+    await baiViet.save();
+
+    res.status(200).json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: 'Lỗi khi xóa bài viết', details: err });
+    console.error('❌ Lỗi khi tăng lượt thích bài viết:', err);
+    res.status(500).json({ error: 'Lỗi khi tăng lượt thích bài viết' });
+  }
+};
+
+// PATCH /api/baiviet/:id/luotbinhluan
+export const tangLuotBinhLuanBaiViet = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const baiViet = await BaiViet.findById(id);
+    if (!baiViet) {
+      res.status(404).json({ error: 'Bài viết không tồn tại' });
+      return;
+    }
+
+    baiViet.luotBinhLuan.push(req.body.luotBinhLuan);  // Giả sử luotBinhLuan là ID của người bình luận
+    await baiViet.save();
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('❌ Lỗi khi tăng lượt bình luận bài viết:', err);
+    res.status(500).json({ error: 'Lỗi khi tăng lượt bình luận bài viết' });
   }
 };

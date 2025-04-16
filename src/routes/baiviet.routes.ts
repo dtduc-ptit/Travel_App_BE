@@ -1,27 +1,31 @@
-import express, { Request, Response } from 'express'; // Import kiểu dữ liệu cho Request và Response
-import { createPost, getPosts, getPostById, updatePost, deletePost } from '../controllers/baiviet.controller';
+import express from 'express';
+import {
+  createBaiViet,
+  getDanhSachBaiViet,
+  getBaiVietById,
+  updateBaiViet,
+  tangLuotThichBaiViet,
+  tangLuotBinhLuanBaiViet
+} from '../controllers/baiviet.controller';
 
 const router = express.Router();
 
-// Route để lấy danh sách bài viết
-router.get('/baiviet', getPosts);
+// GET /api/baiviet
+router.get('/', getDanhSachBaiViet);
 
-// Route để lấy bài viết theo ID
-router.get('/baiviet/:id', getPostById);
+// GET /api/baiviet/:id
+router.get('/:id', getBaiVietById);
 
-// Route để đăng bài viết mới
-router.post('/baiviet', async (req: Request, res: Response) => {
-  try {
-    await createPost(req, res); // Gọi hàm createPost trong controller
-  } catch (error) {
-    res.status(500).json({ error: 'Lỗi khi đăng bài viết' });
-  }
-});
+// POST /api/baiviet
+router.post('/', createBaiViet);  // Kết nối với controller tạo bài viết
 
-// Route để cập nhật bài viết
-router.patch('/baiviet/:id', updatePost);
+// PATCH /api/baiviet/:id
+router.patch('/:id', updateBaiViet);
 
-// Route để xóa bài viết
-router.delete('/baiviet/:id', deletePost);
+// PATCH /api/baiviet/:id/luotthich
+router.patch('/:id/luotthich', tangLuotThichBaiViet);
+
+// PATCH /api/baiviet/:id/luotbinhluan
+router.patch('/:id/luotbinhluan', tangLuotBinhLuanBaiViet);
 
 export default router;
