@@ -43,6 +43,26 @@ const KienThucSchema = new mongoose.Schema({
       maxlength: [30, 'Thẻ không được dài quá 30 ký tự']
     }
   ],
+  videoUrl: {
+    type: String,
+    trim: true,
+    validate: {
+      validator: function (value: string) {
+        return /^https?:\/\/.+/.test(value); // URL cơ bản hợp lệ
+      },
+      message: 'URL video không hợp lệ'
+    }
+  },
+  audioUrl: {
+    type: String,
+    trim: true,
+    validate: {
+      validator: function (value: string) {
+        return /^https?:\/\/.+/.test(value);
+      },
+      message: 'URL audio không hợp lệ'
+    }
+  },
   daDuyet: {
     type: Boolean,
     default: false

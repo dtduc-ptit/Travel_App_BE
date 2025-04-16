@@ -101,26 +101,38 @@ export const tangLuotXemKienThuc = async (req: Request, res: Response) => {
 
 // POST /api/kienthuc
 export const createKienThuc = async (req: Request, res: Response) => {
-  try {
-    const { tieuDe, noiDung, moTaNgan, tacGia, hinhAnh, the, daDuyet } = req.body;
-
-    const kienThuc = new KienThuc({
-      tieuDe,
-      noiDung,
-      moTaNgan,
-      tacGia,
-      hinhAnh: hinhAnh || [],
-      the: the || [],
-      daDuyet: daDuyet || false
-    });
-
-    const saved = await kienThuc.save();
-    res.status(201).json(saved);
-  } catch (err) {
-    console.error('❌ Lỗi khi tạo kiến thức:', err);
-    res.status(500).json({ error: 'Lỗi khi tạo kiến thức' });
-  }
-};
+   try {
+     const {
+       tieuDe,
+       noiDung,
+       moTaNgan,
+       tacGia,
+       hinhAnh,
+       the,
+       daDuyet,
+       videoUrl,
+       audioUrl
+     } = req.body;
+ 
+     const kienThuc = new KienThuc({
+       tieuDe,
+       noiDung,
+       moTaNgan,
+       tacGia,
+       hinhAnh: hinhAnh || [],
+       the: the || [],
+       daDuyet: daDuyet || false,
+       videoUrl: videoUrl || "",
+       audioUrl: audioUrl || ""
+     });
+ 
+     const saved = await kienThuc.save();
+     res.status(201).json(saved);
+   } catch (err) {
+     console.error('❌ Lỗi khi tạo kiến thức:', err);
+     res.status(500).json({ error: 'Lỗi khi tạo kiến thức' });
+   }
+ };
 
 // PATCH /api/kienthuc/:id
 export const updateKienThuc = async (req: Request, res: Response) => {
