@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import {NguoiDung} from '../models/nguoidung.model'; // Giả sử model dùng .ts
+import {NguoiDung} from '../models/nguoidung.model';
+import validator from 'validator';
 
 // Tạo người dùng mới
 export const createNguoiDung = async (req: Request, res: Response): Promise<void> => {
@@ -118,5 +119,99 @@ export const getNguoiDungInfo = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Lỗi khi lấy thông tin người dùng:", error);
     res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+
+export const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { ten, anhDaiDien, moTa, newPassword } = req.body;
+
+  try {
+    const user = await NguoiDung.findById(id);
+    if (!user) {
+      res.status(404).json({ message: 'Không tìm thấy người dùng' });
+      return;
+    }
+
+    // Ngăn chặn cập nhật ngày tạo
+    if ('ngayTao' in req.body) {
+      delete req.body.ngayTao;
+    }
+
+    // Cập nhật tên nếu có
+    if (ten !== undefined) {
+      if (typeof ten !== 'string' || ten.trim().length < 2) {
+        res.status(400).json({ message: 'Tên phải có ít nhất 2 ký tự' });
+        return;
+      }
+      user.ten = ten.trim();
+    }
+
+    // Cập nhật ảnh đại diện nếu có
+    if (anhDaiDien !== undefined) {
+      if (!validator.isURL(anhDaiDien, { require_protocol: true })) {
+        res.status(400).json({ message: 'Ảnh đại diện không hợp lệ (phải là URL hợp lệ)' });
+        return;
+      }
+      user.anhDaiDien = anhDaiDien;
+    }
+
+    // Cập nhật mô tả nếu có
+    if (moTa !== undefined) {
+      user.moTa = typeof moTa === 'string' ? moTa.trim() : '';
+    }
+
+    // Cập nhật mật khẩu nếu có
+    if (newPassword !== undefined) {
+      if (typeof newPassword !== 'string' || newPassword.length < 6) {
+        res.status(400).json({ message: 'Mật khẩu mới phải có ít nhất 6 ký tự' });
+        return;
+      }
+      user.matKhau = newPassword;
+      user.markModified('matKhau'); // Đảm bảo bcrypt sẽ mã hoá lại
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      message: 'Cập nhật thông tin thành công',
+      user: {
+        _id: user._id,
+        ten: user.ten,
+        email: user.email,
+        anhDaiDien: user.anhDaiDien,
+        moTa: user.moTa,
+        ngayTao: user.ngayTao,
+      },
+    });
+  } catch (err) {
+    console.error('❌ Lỗi cập nhật người dùng:', err);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+};
+
+
+// POST /api/users/verify-password
+export const verifyPassword = async (req: Request, res: Response): Promise<void> => {
+  const { userId, currentPassword } = req.body;
+
+  try {
+    const user = await NguoiDung.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      res.status(401).json({ message: 'Incorrect password' });
+      return;
+    }
+
+    res.status(200).json({ message: 'Password verified' });
+  } catch (err) {
+    console.error('❌ Error verifying password:', err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
