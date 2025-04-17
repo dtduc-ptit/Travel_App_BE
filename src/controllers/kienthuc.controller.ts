@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { KienThuc } from '../models/kienthuc.model';
-import { NguoiDung } from '../models/nguoidung.model'; // Nếu cần populate thông tin tác giả
 
 // GET /api/kienthuc
 // Thay thế getAllKienThuc
@@ -9,7 +8,7 @@ export const getDanhSachKienThucTheoLoai = async (req: Request, res: Response) =
      const [noibat, xemnhieu, docdao, moicapnhat] = await Promise.all([
        KienThuc.find({ daDuyet: true }).sort({ createdAt: -1 }).limit(10),
        KienThuc.find({ daDuyet: true } ).sort({ soLuotXem: -1 }).limit(10),
-       KienThuc.find({ daDuyet: true, the: { $in: ["độc đáo", "docdao"] } }).sort({ createdAt: -1 }).limit(10),
+       KienThuc.find({ daDuyet: true, the: { $in: ["docdao"] } }).sort({ createdAt: -1 }).limit(10),
        KienThuc.find({ daDuyet: true }).sort({ createdAt: -1 }).limit(10),
      ]);
  
@@ -102,7 +101,17 @@ export const tangLuotXemKienThuc = async (req: Request, res: Response) => {
 // POST /api/kienthuc
 export const createKienThuc = async (req: Request, res: Response) => {
   try {
-    const { tieuDe, noiDung, moTaNgan, tacGia, hinhAnh, the, daDuyet } = req.body;
+    const {
+      tieuDe,
+      noiDung,
+      moTaNgan,
+      tacGia,
+      hinhAnh,
+      the,
+      daDuyet,
+      videoUrl,
+      audioUrl
+    } = req.body;
 
     const kienThuc = new KienThuc({
       tieuDe,
@@ -111,7 +120,9 @@ export const createKienThuc = async (req: Request, res: Response) => {
       tacGia,
       hinhAnh: hinhAnh || [],
       the: the || [],
-      daDuyet: daDuyet || false
+      daDuyet: daDuyet || false,
+      videoUrl: videoUrl || "",
+      audioUrl: audioUrl || ""
     });
 
     const saved = await kienThuc.save();
