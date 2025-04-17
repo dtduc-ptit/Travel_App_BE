@@ -17,6 +17,7 @@ export interface INguoiDung extends Document {
   noiDungLuuTrus?: mongoose.Types.ObjectId[];
   thongBaos?: mongoose.Types.ObjectId[];
   lichSuTimKiems?: mongoose.Types.ObjectId[];
+  pushToken?: string; // ✅ Thêm pushToken
   matchPassword(enteredPassword: string): Promise<boolean>;
 }
 
@@ -73,6 +74,12 @@ const nguoiDungSchema = new Schema<INguoiDung>(
     noiDungLuuTrus: [{ type: Schema.Types.ObjectId, ref: 'NoiDungLuuTru' }],
     thongBaos: [{ type: Schema.Types.ObjectId, ref: 'ThongBao' }],
     lichSuTimKiems: [{ type: Schema.Types.ObjectId, ref: 'LichSuTimKiem' }],
+
+    // ✅ Push token để gửi thông báo
+    pushToken: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true, // Tự động tạo createdAt và updatedAt
