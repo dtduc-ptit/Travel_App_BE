@@ -24,15 +24,14 @@ dotenv.config();
 
 const app: Application = express();
 const port = process.env.PORT || 8000;
+app.use(cors());
 
 // Thay thế đoạn lấy IP tự động bằng IP LAN thực của máy bạn
 // const localIP = '192.168.41.61';  // Địa chỉ IP LAN của máy tính bạn
-// app.use(cors());
-// app.use(express.json());
+
 // Lấy IP LAN của máy tính
 const networkInterfaces = os.networkInterfaces();
 let localIP = 'localhost';
-
 for (const iface of Object.values(networkInterfaces)) {
   for (const config of iface || []) {
     if (config.family === 'IPv4' && !config.internal) {
