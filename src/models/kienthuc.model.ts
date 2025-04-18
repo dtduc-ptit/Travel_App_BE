@@ -34,6 +34,16 @@ const KienThucSchema = new mongoose.Schema({
       }
     }
   ],
+  videoUrl: {
+    type: String,
+    validate: {
+      validator: function (value: string) {
+        /^https?:\/\/.+/.test(value); // URL hợp lệ cho video
+      },
+      message: 'URL video không hợp lệ'
+    },
+    default: ''
+  },
   the: [
     {
       type: String,

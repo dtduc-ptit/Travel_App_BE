@@ -17,8 +17,8 @@ import kienThucRoutes from './routes/kienthuc.routes';
 import timKiemRoutes from "./routes/timkiem.route";
 import baiVietRoutes from './routes/baiviet.routes';
 import noidungluutruRoutes from './routes/noidungluutru.routes'; 
-import authRoutes from './routes/auth/auth.routes';
-import { createEventNotifications } from './utils/notificationScheduler';  // Import hàm
+import { createEventNotifications } from './utils/notificationScheduler';  
+import luotbinhluanRoutes from './routes/luotbinhluan.routes'; 
 
 dotenv.config();
 
@@ -40,7 +40,7 @@ mongoose
   });
 
 // Routes
-app.use('/api/auth', authRoutes);
+
 app.use('/api/phongtucs', phongtucRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/nguoidung', nguoidungRoutes);
@@ -52,6 +52,7 @@ app.use('/api/thongbao', thongBaoRoutes);
 app.use("/api/timkiem", timKiemRoutes);
 app.use('/api/baiViet', baiVietRoutes);
 app.use('/api/noidungluutru', noidungluutruRoutes);
+app.use('/api/luotbinhluan', luotbinhluanRoutes); 
 // Route test
 app.get('/', (req, res) => {
   res.send('🚀 API Travel đang chạy!');

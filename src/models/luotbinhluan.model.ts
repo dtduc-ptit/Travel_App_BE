@@ -1,49 +1,33 @@
-// src/schemas/luot-binh-luan.schema.ts
+import mongoose from 'mongoose';
 
-import { Schema, Types } from 'mongoose';
-
-export const LuotBinhLuanSchema = new Schema(
-  {
-    // Người viết bình luận
-    nguoiDung: {
-      type: Types.ObjectId,
-      ref: 'NguoiDung',
-      required: true,
-    },
-
-    // Bài viết được bình luận
-    baiViet: {
-      type: Types.ObjectId,
-      ref: 'BaiViet',
-      required: true,
-    },
-
-    // Nội dung của bình luận
-    noiDung: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    //Trường mới: Bình luận này là phản hồi cho bình luận nào?
-    phanHoiCho: {
-        type: Types.ObjectId,
-        ref: 'LuotBinhLuan',
-        default: null, // Nếu null tức là bình luận gốc
-    },   
-    // Thời gian bình luận
-    thoiGian: {
-      type: Date,
-      default: Date.now,
-    },
+const LuotBinhLuanSchema = new mongoose.Schema({
+  nguoiDung: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'NguoiDung',
+    required: [true, 'Người dùng là bắt buộc'],
   },
-  {
-    timestamps: true, // Tự động tạo createdAt và updatedAt
+  baiViet: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'BaiViet',
+    required: [true, 'Bài viết là bắt buộc'],
   },
-);
+  noiDung: {
+    type: String,
+    required: [true, 'Nội dung bình luận là bắt buộc'],
+    trim: true,
+    minlength: [1, 'Nội dung không được để trống'],
+  },
+  phanHoiCho: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'LuotBinhLuan',
+    default: null,
+  },
+  thoiGian: {
+    type: Date,
+    default: Date.now,
+  },
+}, {
+  timestamps: true,
+});
 
-LuotBinhLuanSchema.index({ baiViet: 1 });
-LuotBinhLuanSchema.index({ nguoiDung: 1 });
-
-
-
+export const LuotBinhLuan = mongoose.model('LuotBinhLuan', LuotBinhLuanSchema);
