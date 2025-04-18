@@ -40,7 +40,7 @@ const mediaSchema = new Schema<IMedia>(
     },
     moTa: {
       type: String,
-      maxlength: [500, 'Mô tả không được vượt quá 500 ký tự'],
+      maxlength: [100000, 'Mô tả không được vượt quá 100000 ký tự'],
     },
   },
   {

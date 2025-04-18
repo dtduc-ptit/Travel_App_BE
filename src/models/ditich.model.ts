@@ -39,7 +39,7 @@ const diTichSchema: Schema<IDTTich> = new Schema(
     moTa: {
       type: String,
       trim: true,
-      maxlength: [1000, 'Mô tả không được vượt quá 1000 ký tự'],
+      maxlength: [100000, 'Mô tả không được vượt quá 10000000 ký tự'],
     },
     viTri: {
       type: String,

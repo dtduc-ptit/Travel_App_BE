@@ -10,11 +10,11 @@ const phongTucSchema = new mongoose.Schema({
   },
   moTa: { 
     type: String,
-    maxlength: [1000, 'Mô tả quá dài']
+    maxlength: [100000, 'Mô tả quá dài']
   },
   yNghia: { 
     type: String,
-    maxlength: [1000, 'Ý nghĩa quá dài']
+    maxlength: [100000, 'Ý nghĩa quá dài']
   },
   loai: { 
     type: String,
@@ -62,7 +62,7 @@ const phongTucSchema = new mongoose.Schema({
   },
   huongDan: { 
     type: String,
-    maxlength: [1000, 'Hướng dẫn quá dài']
+    maxlength: [100000, 'Hướng dẫn quá dài']
   },
 
   // Liên kết tới bảng NoiDungLuuTru
