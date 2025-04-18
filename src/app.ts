@@ -17,6 +17,7 @@ import kienThucRoutes from './routes/kienthuc.routes';
 import timKiemRoutes from "./routes/timkiem.route";
 import baiVietRoutes from './routes/baiviet.routes';
 import noidungluutruRoutes from './routes/noidungluutru.routes'; 
+import authRoutes from './routes/auth/auth.routes';
 import { createEventNotifications } from './utils/notificationScheduler';  // Import hàm
 
 dotenv.config();
@@ -39,6 +40,7 @@ mongoose
   });
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/phongtucs', phongtucRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/nguoidung', nguoidungRoutes);

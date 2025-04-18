@@ -15,11 +15,11 @@ const phongTucSchema = new mongoose_1.default.Schema({
     },
     moTa: {
         type: String,
-        maxlength: [1000, 'Mô tả quá dài']
+        maxlength: [100000, 'Mô tả quá dài']
     },
     yNghia: {
         type: String,
-        maxlength: [1000, 'Ý nghĩa quá dài']
+        maxlength: [100000, 'Ý nghĩa quá dài']
     },
     loai: {
         type: String,
