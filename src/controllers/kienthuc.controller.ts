@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { KienThuc } from '../models/kienthuc.model';
-import { NguoiDung } from '../models/nguoidung.model'; // Nếu cần populate thông tin tác giả
+import mongoose from 'mongoose';
 
 // GET /api/kienthuc
 // Thay thế getAllKienThuc
@@ -9,7 +9,7 @@ export const getDanhSachKienThucTheoLoai = async (req: Request, res: Response) =
      const [noibat, xemnhieu, docdao, moicapnhat] = await Promise.all([
        KienThuc.find({ daDuyet: true }).sort({ createdAt: -1 }).limit(10),
        KienThuc.find({ daDuyet: true } ).sort({ soLuotXem: -1 }).limit(10),
-       KienThuc.find({ daDuyet: true, the: { $in: ["độc đáo", "docdao"] } }).sort({ createdAt: -1 }).limit(10),
+       KienThuc.find({ daDuyet: true, the: { $in: ["docdao"] } }).sort({ createdAt: -1 }).limit(10),
        KienThuc.find({ daDuyet: true }).sort({ createdAt: -1 }).limit(10),
      ]);
  
@@ -26,7 +26,7 @@ export const getNoiBatKienThuc = async (req: Request, res: Response) => {
     const { the } = req.query;
 
     const filter: any = { daDuyet: true };
-    if (the) filter.the = { $in: [the] };
+    if (the) filter.the = { $in: [the] }; // Tìm theo thể loại (the), không phải _id
 
     const kienThucList = await KienThuc.find(filter).sort({ createdAt: -1 }).limit(10);
     res.json(kienThucList);
@@ -35,6 +35,7 @@ export const getNoiBatKienThuc = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Lỗi khi lấy kiến thức nổi bật' });
   }
 };
+
 
 // GET /api/kienthuc/phobien
 export const getPhoBienKienThuc = async (req: Request, res: Response) => {
@@ -66,18 +67,29 @@ export const getKienThucXemNhieu = async (req: Request, res: Response) => {
 // GET /api/kienthuc/:id
 export const getKienThucById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const kienThuc = await KienThuc.findById(id).populate('tacGia', 'hoTen email'); // Nếu muốn
+    const { id } = req.params; // Đảm bảo rằng id là ObjectId
+    let kienThuc;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      // Tìm theo _id nếu id là ObjectId
+      kienThuc = await KienThuc.findById(id).populate('tacGia', 'hoTen email');
+    } else {
+      // Tìm theo category (the) nếu id không phải là ObjectId
+      kienThuc = await KienThuc.findOne({ the: id }).populate('tacGia', 'hoTen email');
+    }
+
     if (!kienThuc) {
       res.status(404).json({ error: 'Không tìm thấy kiến thức' });
       return;
     }
+
     res.json(kienThuc);
   } catch (err) {
     console.error('❌ Lỗi khi lấy chi tiết kiến thức:', err);
     res.status(500).json({ error: 'Lỗi khi lấy chi tiết kiến thức' });
   }
 };
+
 
 // PATCH /api/kienthuc/:id/luotxem
 export const tangLuotXemKienThuc = async (req: Request, res: Response) => {
@@ -102,7 +114,17 @@ export const tangLuotXemKienThuc = async (req: Request, res: Response) => {
 // POST /api/kienthuc
 export const createKienThuc = async (req: Request, res: Response) => {
   try {
-    const { tieuDe, noiDung, moTaNgan, tacGia, hinhAnh, the, daDuyet } = req.body;
+    const {
+      tieuDe,
+      noiDung,
+      moTaNgan,
+      tacGia,
+      hinhAnh,
+      the,
+      daDuyet,
+      videoUrl,
+      audioUrl
+    } = req.body;
 
     const kienThuc = new KienThuc({
       tieuDe,
@@ -111,7 +133,9 @@ export const createKienThuc = async (req: Request, res: Response) => {
       tacGia,
       hinhAnh: hinhAnh || [],
       the: the || [],
-      daDuyet: daDuyet || false
+      daDuyet: daDuyet || false,
+      videoUrl: videoUrl || "",
+      audioUrl: audioUrl || ""
     });
 
     const saved = await kienThuc.save();
@@ -141,5 +165,39 @@ export const updateKienThuc = async (req: Request, res: Response) => {
   } catch (err) {
     console.error('❌ Lỗi khi cập nhật kiến thức:', err);
     res.status(500).json({ error: 'Lỗi khi cập nhật kiến thức' });
+  }
+};
+
+// get api/kienthuc/docdao
+
+export const getDocDaoKienThuc = async (req: Request, res: Response) => {
+  try {
+    const { the } = req.query;
+
+    const filter: any = { daDuyet: true };
+
+    // Kiểm tra xem có tham số the truyền vào không, nếu có thì tìm kiếm theo thể loại 'docdao'
+    if (the) {
+      filter.the = { $in: ["docdao"] }; // Lọc các kiến thức có 'the' là 'docdao'
+    }
+
+    const kienThucList = await KienThuc.find(filter).sort({ createdAt: -1 }).limit(10);
+    res.json(kienThucList);
+  } catch (err) {
+    console.error('❌ Lỗi khi lấy kiến thức độc đáo:', err);
+    res.status(500).json({ error: 'Lỗi khi lấy kiến thức độc đáo' });
+  }
+};
+
+// get api/kienthuc/docdao
+
+export const getMoiCapNhatKienThuc = async (req: Request, res: Response) => {
+  try {
+    // Lọc các bài viết đã duyệt
+    const kienThucList = await KienThuc.find({ daDuyet: true }).sort({ createdAt: -1 }).limit(10); // Giới hạn 10 bài viết mới nhất
+    res.json(kienThucList);
+  } catch (err) {
+    console.error('❌ Lỗi khi lấy kiến thức mới cập nhật:', err);
+    res.status(500).json({ error: 'Lỗi khi lấy kiến thức mới cập nhật' });
   }
 };
