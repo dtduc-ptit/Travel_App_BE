@@ -69,6 +69,8 @@ for (const iface of Object.values(networkInterfaces)) {
   }
 }
 
+// let localIP = '192.168.74.61';
+
 // Gọi hàm createEventNotifications ngay khi server khởi động
 mongoose.connection.once('open', () => {
   console.log('🟢 Kết nối DB thành công, bắt đầu chạy cron gửi thông báo...');
