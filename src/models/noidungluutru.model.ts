@@ -9,7 +9,7 @@ const noiDungLuuTruSchema = new mongoose.Schema({
 
   loaiNoiDung: {
     type: String,
-    enum: ['SuKien', 'DiTich', 'PhongTuc', 'DiaDiem'],
+    enum: ['SuKien', 'DiTich', 'PhongTuc'],
     required: true,
   },
 

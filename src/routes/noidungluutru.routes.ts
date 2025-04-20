@@ -1,9 +1,10 @@
 import { 
     createNoiDungLuuTru, 
     checkNoiDungLuuTru , 
-    getDiaDiemDaLuu,
+    getDiTichDaLuu,
     deleteNoiDungLuuTru,
-    getPhongTucDaLuu
+    getPhongTucDaLuu,
+    getSuKienDaLuu
 } from '../controllers/noidungluutru.controller';
 const express = require('express');
 const router = express.Router();
@@ -11,8 +12,10 @@ const router = express.Router();
 router.post('/', createNoiDungLuuTru);
 router.delete('/', deleteNoiDungLuuTru);
 router.get('/kiemtra', checkNoiDungLuuTru);
-router.get('/diadiem', getDiaDiemDaLuu);
+router.get('/ditich', getDiTichDaLuu);
 router.get('/phongtuc', getPhongTucDaLuu);
+router.get('/sukien', getSuKienDaLuu);
+
 
 export default router;
 

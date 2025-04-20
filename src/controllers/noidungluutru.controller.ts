@@ -3,6 +3,8 @@ import { NoiDungLuuTru } from '../models/noidungluutru.model';
 import { DTTich } from '../models/ditich.model';
 import { Media } from '../models/media.model';
 import { PhongTuc } from '../models/phongtuc.model';
+import { SuKien } from '../models/sukien.model';
+
 
 export const createNoiDungLuuTru = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -17,7 +19,7 @@ export const createNoiDungLuuTru = async (req: Request, res: Response): Promise<
     }
 
     // Kiểm tra loaiNoiDung có hợp lệ không
-    const validLoaiNoiDung = ['SuKien', 'DiTich', 'PhongTuc', 'DiaDiem'];
+    const validLoaiNoiDung = ['SuKien', 'DiTich', 'PhongTuc'];
     if (!validLoaiNoiDung.includes(loaiNoiDung)) {
       res.status(400).json({
         message: `loaiNoiDung không hợp lệ. Phải là một trong: ${validLoaiNoiDung.join(', ')}`,
@@ -73,7 +75,7 @@ export const checkNoiDungLuuTru = async (req: Request, res: Response): Promise<v
 };
 
 
-export const getDiaDiemDaLuu = async (req: Request, res: Response): Promise<void> => {
+export const getDiTichDaLuu = async (req: Request, res: Response): Promise<void> => {
   try {
     const { nguoiDung } = req.query;
 
@@ -82,39 +84,38 @@ export const getDiaDiemDaLuu = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Danh sách lưu loại 'DiaDiem'
     const danhSachLuu = await NoiDungLuuTru.find({
       nguoiDung,
-      loaiNoiDung: 'DiaDiem',
+      loaiNoiDung: 'DiTich',
     });
 
-    const idDiaDiems = danhSachLuu.map(item => item.idNoiDung);
+    const idDiTichs = danhSachLuu.map(item => item.idNoiDung);
 
     // Lấy thông tin địa điểm từ DTTich
-    const diaDiemsFromDB = await DTTich.find({ _id: { $in: idDiaDiems } }).select('ten viTri');
+    const diTichsFromDB = await DTTich.find({ _id: { $in: idDiTichs } }).select('ten viTri');
 
     // Lấy media liên quan đến các địa điểm
     const mediaList = await Media.find({
       doiTuong: "DTTich",
-      doiTuongId: { $in: idDiaDiems },
+      doiTuongId: { $in: idDiTichs },
       type: "image",
     });
 
     // Gộp thông tin
-    const diaDiems = diaDiemsFromDB.map(diaDiem => {
-      const noiDung = danhSachLuu.find(item => item.idNoiDung.toString() === diaDiem._id.toString());
-      const media = mediaList.find(m => m.doiTuongId.toString() === diaDiem._id.toString());
+    const diTichs = diTichsFromDB.map(diTich => {
+      const noiDung = danhSachLuu.find(item => item.idNoiDung.toString() === diTich._id.toString());
+      const media = mediaList.find(m => m.doiTuongId.toString() === diTich._id.toString());
 
       return {
-        _id: diaDiem._id,
-        ten: diaDiem.ten,
-        viTri: diaDiem.viTri,
+        _id: diTich._id,
+        ten: diTich.ten,
+        viTri: diTich.viTri,
         moTa: noiDung?.moTa || null,
         imageUrl: media?.url || null,
       };
     });
 
-    res.status(200).json({ diaDiems });
+    res.status(200).json({ diTichs });
   } catch (err) {
     res.status(500).json({ message: 'Lỗi server', error: (err as Error).message });
   }
@@ -168,7 +169,49 @@ export const getPhongTucDaLuu = async (req: Request, res: Response): Promise<voi
   }
 };
 
+export const getSuKienDaLuu = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { nguoiDung } = req.query;
 
+    if (!nguoiDung) {
+      res.status(400).json({ message: 'Thiếu tham số nguoiDung' });
+      return;
+    }
+
+    const danhSachLuu = await NoiDungLuuTru.find({
+      nguoiDung,
+      loaiNoiDung: 'SuKien',
+    });
+
+    const idSuKiens = danhSachLuu.map(item => item.idNoiDung);
+
+    const suKienFromDB = await SuKien.find({ _id: { $in: idSuKiens } }).select('ten diaDiem');
+
+    const mediaList = await Media.find({
+      doiTuong: "SuKien",
+      doiTuongId: { $in: idSuKiens },
+      type: "image",
+    });
+
+    // Gộp thông tin
+    const suKiens = suKienFromDB.map(suKien => {
+      const noiDung = danhSachLuu.find(item => item.idNoiDung.toString() === suKien._id.toString());
+      const media = mediaList.find(m => m.doiTuongId.toString() === suKien._id.toString());
+
+      return {
+        _id: suKien._id,
+        ten: suKien.ten,
+        viTri: suKien.diaDiem,
+        moTa: noiDung?.moTa || null,
+        imageUrl: media?.url || null,
+      };
+    });
+
+    res.status(200).json({ suKiens });
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi server', error: (err as Error).message });
+  }
+};
 
 export const deleteNoiDungLuuTru = async (req: Request, res: Response): Promise<void> => {
   const { nguoiDung, loaiNoiDung, idNoiDung } = req.body;

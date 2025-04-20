@@ -1,32 +1,25 @@
-// src/schemas/luot-thich.schema.ts
+import mongoose from 'mongoose';
 
-import { Schema, Types } from 'mongoose';
-
-export const LuotThichSchema = new Schema(
+const LuotThichSchema = new mongoose.Schema(
   {
-    // Người dùng thực hiện hành động "thích"
     nguoiDung: {
-      type: Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'NguoiDung',
-      required: true,
+      required: [true, 'Người dùng là bắt buộc'],
     },
-
-    // Bài viết được thích
     baiViet: {
-      type: Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'BaiViet',
-      required: true,
+      required: [true, 'Bài viết là bắt buộc'],
     },
-
-    // Thời điểm thích
     thoiGian: {
       type: Date,
       default: Date.now,
     },
   },
   {
-    timestamps: true, // thêm createdAt, updatedAt
-  },
+    timestamps: true, // tự động thêm createdAt và updatedAt
+  }
 );
 
-LuotThichSchema.index({ nguoiDung: 1, baiViet: 1 }, { unique: true });
+export const LuotThich = mongoose.model('LuotThich', LuotThichSchema);

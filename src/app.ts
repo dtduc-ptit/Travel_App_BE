@@ -20,6 +20,7 @@ import noidungluutruRoutes from './routes/noidungluutru.routes';
 import { createEventNotifications } from './utils/notificationScheduler';  
 import luotbinhluanRoutes from './routes/luotbinhluan.routes'; 
 import bandoRoutes from './routes/bando.routes';
+import luotthichRoutes from './routes/luotthich.routes';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use('/api/baiViet', baiVietRoutes);
 app.use('/api/noidungluutru', noidungluutruRoutes);
 app.use('/api/luotbinhluan', luotbinhluanRoutes); 
 app.use('/api/bando', bandoRoutes);
+app.use('/api/luotthich', luotthichRoutes); 
 // Route test
 app.get('/', (req, res) => {
   res.send('🚀 API Travel đang chạy!');
@@ -71,6 +73,8 @@ for (const iface of Object.values(networkInterfaces)) {
     }
   }
 }
+
+// let localIP = '192.168.74.61';
 
 // Gọi hàm createEventNotifications ngay khi server khởi động
 mongoose.connection.once('open', () => {
