@@ -3,6 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 export interface IDanhGiaNguoiDung {
   userId: string;
   diem: number;
+  binhLuan: string;
 }
 
 export interface IDTTich {
@@ -20,10 +21,12 @@ export interface IDTTich {
   camNang?: string;
 }
 
+
 const danhGiaNguoiDungSchema: Schema<IDanhGiaNguoiDung> = new Schema(
   {
     userId: { type: String, required: true },
     diem: { type: Number, required: true, min: 1, max: 5 },
+    binhLuan: { type: String, required: true },
   },
   { _id: false }
 );
@@ -40,7 +43,7 @@ const diTichSchema: Schema<IDTTich> = new Schema(
     moTa: {
       type: String,
       trim: true,
-      maxlength: [100000, 'Mô tả không được vượt quá 10000000 ký tự'],
+      maxlength: [100000, 'Mô tả không được vượt quá 100000 ký tự'],
     },
     viTri: {
       type: String,
@@ -57,9 +60,9 @@ const diTichSchema: Schema<IDTTich> = new Schema(
       type: Date,
       default: Date.now,
     },
-    soNguoiDanhGia: { 
-      type: Number, 
-      default: 0 
+    soNguoiDanhGia: {
+      type: Number,
+      default: 0,
     },
     luotXem: {
       type: Number,
@@ -89,8 +92,7 @@ const diTichSchema: Schema<IDTTich> = new Schema(
   },
   {
     timestamps: true,
-  },
-  
+  }
 );
 
 export const DTTich = mongoose.model<IDTTich>('DTTich', diTichSchema);

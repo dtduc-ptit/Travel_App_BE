@@ -6,7 +6,7 @@ export const layThongBaoTheoNguoiDung = async (req: Request, res: Response): Pro
     const { userId } = req.params;
 
     const thongBaos = await ThongBaoSuKien.find({ nguoiDung: userId })
-      .populate('suKien', 'ten ngayBatDau') // nếu muốn lấy tên sự kiện
+      .populate('suKien', 'ten ngayBatDau') 
       .sort({ thoiGianGui: -1 });
 
     res.status(200).json(thongBaos);
