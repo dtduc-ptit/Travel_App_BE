@@ -16,6 +16,7 @@ import thongBaoRoutes from './routes/thongbaosukien.routes';
 import kienThucRoutes from './routes/kienthuc.routes';
 import timKiemRoutes from "./routes/timkiem.route";
 import baiVietRoutes from './routes/baiviet.routes';
+import danhGiaRoutes from "./routes/danhgia.routes";
 import noidungluutruRoutes from './routes/noidungluutru.routes'; 
 import { createEventNotifications } from './utils/notificationScheduler';  
 import luotbinhluanRoutes from './routes/luotbinhluan.routes'; 
@@ -53,6 +54,8 @@ app.use("/api/timkiem", timKiemRoutes);
 app.use('/api/baiViet', baiVietRoutes);
 app.use('/api/noidungluutru', noidungluutruRoutes);
 app.use('/api/luotbinhluan', luotbinhluanRoutes); 
+app.use("/api/danhgia", danhGiaRoutes);
+
 // Route test
 app.get('/', (req, res) => {
   res.send('🚀 API Travel đang chạy!');
