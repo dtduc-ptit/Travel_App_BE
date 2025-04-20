@@ -16,6 +16,7 @@ import thongBaoRoutes from './routes/thongbaosukien.routes';
 import kienThucRoutes from './routes/kienthuc.routes';
 import timKiemRoutes from "./routes/timkiem.route";
 import baiVietRoutes from './routes/baiviet.routes';
+import danhGiaRoutes from "./routes/danhgia.routes";
 import noidungluutruRoutes from './routes/noidungluutru.routes'; 
 import { createEventNotifications } from './utils/notificationScheduler';  
 import luotbinhluanRoutes from './routes/luotbinhluan.routes'; 
@@ -57,24 +58,16 @@ app.use('/api/noidungluutru', noidungluutruRoutes);
 app.use('/api/luotbinhluan', luotbinhluanRoutes); 
 app.use('/api/bando', bandoRoutes);
 app.use('/api/luotthich', luotthichRoutes); 
+app.use("/api/danhgia", danhGiaRoutes);
 // Route test
 app.get('/', (req, res) => {
   res.send('🚀 API Travel đang chạy!');
 });
 
 // Lấy IP LAN của máy tính
-const networkInterfaces = os.networkInterfaces();
-let localIP = 'localhost';
 
-for (const iface of Object.values(networkInterfaces)) {
-  for (const config of iface || []) {
-    if (config.family === 'IPv4' && !config.internal) {
-      localIP = config.address;
-    }
-  }
-}
 
-// let localIP = '192.168.74.61';
+let localIP = '192.168.74.61';
 
 // Gọi hàm createEventNotifications ngay khi server khởi động
 mongoose.connection.once('open', () => {
