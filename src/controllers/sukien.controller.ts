@@ -139,6 +139,7 @@ export const createSuKien = async (req: Request, res: Response) => {
       danhGia,
       luotXem,
       huongDan,
+      camNang,
       noiDungLuuTruId,
       media
     } = req.body;
@@ -152,6 +153,7 @@ export const createSuKien = async (req: Request, res: Response) => {
       diaDiem,
       danhGia,
       luotXem,
+      camNang,
       huongDan,
       noiDungLuuTruId,
       media: media || [],
@@ -191,6 +193,7 @@ export const updateSuKien = async (req: Request, res: Response) => {
       danhGia,
       luotXem,
       huongDan,
+      camNang,
       noiDungLuuTruId,
       media
     } = req.body;
@@ -210,6 +213,7 @@ export const updateSuKien = async (req: Request, res: Response) => {
     if (danhGia !== undefined) suKien.danhGia = danhGia;
     if (luotXem !== undefined) suKien.luotXem = luotXem;
     if (huongDan !== undefined) suKien.huongDan = huongDan;
+    if (camNang !== undefined) suKien.camNang = camNang;
     if (noiDungLuuTruId !== undefined) suKien.noiDungLuuTruId = noiDungLuuTruId;
     if (media !== undefined) suKien.media = media;
 

@@ -116,7 +116,8 @@ export const createDiTich = async (req: Request, res: Response) => {
       soNguoiDanhGia,
       luotXem,
       noiDungLuuTru,
-      media
+      media,
+      camNang
     } = req.body;
 
     const diTich = new DTTich({
@@ -127,6 +128,7 @@ export const createDiTich = async (req: Request, res: Response) => {
       huongDan,
       soNguoiDanhGia,
       luotXem,
+      camNang,
       thoiGianCapNhat: new Date(),
       noiDungLuuTru: noiDungLuuTru || null,
       media: media || []
@@ -165,6 +167,7 @@ export const updateDiTich = async (req: Request, res: Response) => {
       viTri,
       danhGia,
       huongDan,
+      camNang,
       noiDungLuuTru,
       media
     } = req.body;
@@ -180,6 +183,7 @@ export const updateDiTich = async (req: Request, res: Response) => {
     if (viTri !== undefined) diTich.viTri = viTri;
     if (danhGia !== undefined) diTich.danhGia = danhGia;
     if (huongDan !== undefined) diTich.huongDan = huongDan;
+    if (camNang !== undefined) diTich.camNang = camNang;
     if (media !== undefined) diTich.media = media;
 
 

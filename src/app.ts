@@ -19,6 +19,7 @@ import baiVietRoutes from './routes/baiviet.routes';
 import noidungluutruRoutes from './routes/noidungluutru.routes'; 
 import { createEventNotifications } from './utils/notificationScheduler';  
 import luotbinhluanRoutes from './routes/luotbinhluan.routes'; 
+import bandoRoutes from './routes/bando.routes';
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use("/api/timkiem", timKiemRoutes);
 app.use('/api/baiViet', baiVietRoutes);
 app.use('/api/noidungluutru', noidungluutruRoutes);
 app.use('/api/luotbinhluan', luotbinhluanRoutes); 
+app.use('/api/bando', bandoRoutes);
 // Route test
 app.get('/', (req, res) => {
   res.send('🚀 API Travel đang chạy!');

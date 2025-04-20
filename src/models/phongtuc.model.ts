@@ -79,6 +79,11 @@ const phongTucSchema = new mongoose.Schema({
       ref: 'Media'
     }
   ],
+  camNang: {
+    type: String,
+    trim: true,
+    maxlength: [100000, 'Cẩm nang quá dài']
+  }
 });
 
 export const PhongTuc = mongoose.model('PhongTuc', phongTucSchema);

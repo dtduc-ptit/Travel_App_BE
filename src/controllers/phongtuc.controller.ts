@@ -88,6 +88,7 @@ export const createPhongTuc = async (req: Request, res: Response) => {
       huongDan,
       luotXem,
       noiDungLuuTru,
+      camNang,
       media // Array các media ID hoặc null nếu chưa có
     } = req.body;
 
@@ -102,6 +103,7 @@ export const createPhongTuc = async (req: Request, res: Response) => {
       luotXem,
       diaDiem,
       huongDan,
+      camNang,
       noiDungLuuTru: noiDungLuuTru || null,
       media: media || []
     });
@@ -138,11 +140,11 @@ export const updatePhongTuc = async (req: Request, res: Response): Promise<void>
       yNghia,
       loai,
       danhGia,
-      soNguoiDanhGia,
       diaDiem,
       huongDan,
+      camNang,
       noiDungLuuTru,
-      media // Có thể là mảng mới hoặc không gửi
+      media 
     } = req.body;
 
     const phongTuc = await PhongTuc.findById(id);
@@ -151,13 +153,13 @@ export const updatePhongTuc = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    // Cập nhật các trường nếu có
     if (ten !== undefined) phongTuc.ten = ten;
     if (moTa !== undefined) phongTuc.moTa = moTa;
     if (yNghia !== undefined) phongTuc.yNghia = yNghia;
     if (loai !== undefined) phongTuc.loai = loai;
     if (danhGia !== undefined) phongTuc.danhGia = danhGia;
     if (diaDiem !== undefined) phongTuc.diaDiem = diaDiem;
+    if (camNang !== undefined) phongTuc.camNang = camNang;
     if (huongDan !== undefined) phongTuc.huongDan = huongDan;
     if (noiDungLuuTru !== undefined) phongTuc.noiDungLuuTru = noiDungLuuTru;
     if (media !== undefined) phongTuc.media = media;

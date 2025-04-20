@@ -55,6 +55,11 @@ const suKienSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  camNang: {
+    type: String,
+    trim: true,
+    maxlength: [100000, 'Nội dung không được vượt quá 100000 ký tự'],
+  },
   noiDungLuuTruId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'NoiDungLuuTru',

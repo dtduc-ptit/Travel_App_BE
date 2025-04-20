@@ -17,6 +17,7 @@ export interface IDTTich {
   noiDungLuuTruId?: mongoose.Types.ObjectId;
   media: mongoose.Types.ObjectId[];
   danhGiaNguoiDung?: IDanhGiaNguoiDung[];
+  camNang?: string;
 }
 
 const danhGiaNguoiDungSchema: Schema<IDanhGiaNguoiDung> = new Schema(
@@ -73,6 +74,11 @@ const diTichSchema: Schema<IDTTich> = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'NoiDungLuuTru',
     },
+    camNang: {
+      type: String,
+      trim: true,
+      maxlength: [100000, 'Nội dung không được vượt quá 100000 ký tự'],
+    },
     media: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -84,6 +90,7 @@ const diTichSchema: Schema<IDTTich> = new Schema(
   {
     timestamps: true,
   },
+  
 );
 
 export const DTTich = mongoose.model<IDTTich>('DTTich', diTichSchema);
