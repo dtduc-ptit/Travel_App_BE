@@ -11,7 +11,8 @@ import {
   searchSuKienByTen,
   getSuKienSapDienRa,
   getAllSuKienSorted,
-  danhGiaSuKien
+  danhGiaSuKien,
+  layDanhGiaSuKien,
 } from '../controllers/sukien.controller';
 
 const router = express.Router();
@@ -25,6 +26,7 @@ router.get('/sapxepsukien', getAllSuKienSorted);
 router.get('/:id', getSuKienById);
 router.post('/', createSuKien);
 router.patch('/:id/danhgia', danhGiaSuKien);
+router.get('/:id/danhgia', layDanhGiaSuKien);
 router.patch('/:id', updateSuKien);
 router.patch('/:id/luotxem', tangLuotXemSuKien);
 router.get('/search', searchSuKienByTen)

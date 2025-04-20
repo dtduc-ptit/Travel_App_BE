@@ -1,9 +1,11 @@
 import mongoose, { Schema } from 'mongoose';
 
-const danhGiaNguoiDungSchema = new Schema(
+// Define the danhGiaNguoiDungSchema as used in ditich.model
+const danhGiaNguoiDungSchema: Schema = new Schema(
   {
     userId: { type: String, required: true },
     diem: { type: Number, required: true, min: 1, max: 5 },
+    binhLuan: { type: String, required: true },
   },
   { _id: false }
 );

@@ -6,7 +6,7 @@ export const createBaiViet = async (req: Request, res: Response, next: NextFunct
   try {
     const { nguoiDung, noiDung, hinhAnh } = req.body;
 
-    // Kiểm tra dữ liệu đầu vào
+    // Kiểm tra dữ liệu đầu vào 
     if (!nguoiDung || !noiDung || !hinhAnh) {
       res.status(400).json({ error: 'Thiếu thông tin cần thiết' });
       return;

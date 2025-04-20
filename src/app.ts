@@ -16,10 +16,10 @@ import thongBaoRoutes from './routes/thongbaosukien.routes';
 import kienThucRoutes from './routes/kienthuc.routes';
 import timKiemRoutes from "./routes/timkiem.route";
 import baiVietRoutes from './routes/baiviet.routes';
-import danhGiaRoutes from "./routes/danhgia.routes";
 import noidungluutruRoutes from './routes/noidungluutru.routes'; 
-import { createEventNotifications } from './utils/notificationScheduler';  
+import { createEventNotifications  } from './utils/notificationScheduler';  
 import luotbinhluanRoutes from './routes/luotbinhluan.routes'; 
+import luotthichRoutes from './routes/luotthich.routes';
 
 dotenv.config();
 
@@ -54,7 +54,7 @@ app.use("/api/timkiem", timKiemRoutes);
 app.use('/api/baiViet', baiVietRoutes);
 app.use('/api/noidungluutru', noidungluutruRoutes);
 app.use('/api/luotbinhluan', luotbinhluanRoutes); 
-app.use("/api/danhgia", danhGiaRoutes);
+app.use('/api/luotthich', luotthichRoutes); 
 
 // Route test
 app.get('/', (req, res) => {
@@ -73,13 +73,14 @@ for (const iface of Object.values(networkInterfaces)) {
   }
 }
 
+// let localIP = '192.168.74.61';
+
 // Gọi hàm createEventNotifications ngay khi server khởi động
 mongoose.connection.once('open', () => {
   console.log('🟢 Kết nối DB thành công, bắt đầu chạy cron gửi thông báo...');
 
   // ✅ Chạy ngay khi server khởi động
   createEventNotifications();
-
   // ✅ Thiết lập cron job chạy mỗi ngày lúc 0h (nửa đêm)
   cron.schedule('0 0 * * *', async () => {
     console.log('🔁 [CRON] Đang kiểm tra sự kiện để gửi thông báo...');
@@ -91,3 +92,4 @@ mongoose.connection.once('open', () => {
 app.listen(Number(port), host, () => {
   console.log(`🚀 Server đang chạy tại http://${localIP}:${port}`);
 });
+

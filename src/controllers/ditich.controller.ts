@@ -4,8 +4,9 @@ import { Media } from '../models/media.model';
 import { Types } from 'mongoose';
 import { HydratedDocument } from 'mongoose';
 import { IDTTich } from '../models/ditich.model';
-
-
+import mongoose from 'mongoose';
+import { IDanhGiaNguoiDung } from '../models/ditich.model';
+import { NguoiDung } from '../models/nguoidung.model';
 export const getAllDiTich = async (req: Request, res: Response) => {
   try {
     const ditichs = await DTTich.find();
@@ -287,50 +288,98 @@ export const tangLuotXemDiTich = async (req: Request, res: Response): Promise<vo
     res.status(500).json({ error: 'Lỗi server khi tăng lượt xem' });
   }
 };
-
 export const danhGiaDiTich = async (req: Request, res: Response): Promise<void> => {
+
+  
   try {
-    const { id } = req.params; 
-    const { diem, userId } = req.body; 
+    const diTichId = req.params.id;
+    const { userId, diem, binhLuan } = req.body;
 
-    console.log('DiTich ID:', id);
-    console.log('Điểm đánh giá:', diem);
-    console.log('UserId:', userId);
-    if (!diem || typeof diem !== 'number' || diem < 1 || diem > 5) {
-      res.status(400).json({ message: "Điểm đánh giá phải là số từ 1 đến 5" });
+    const diTich = await DTTich.findById(diTichId);
+    if (!diTich) {
+      res.status(404).json({ message: 'Không tìm thấy di tích' });
       return;
     }
 
-    const ditich = await DTTich.findById(id);
-    if (!ditich) {
-      res.status(404).json({ message: "Không tìm thấy di tích" });
+    if (diem < 1 || diem > 5) {
+      res.status(400).json({ message: 'Điểm đánh giá phải từ 1 đến 5' });
       return;
     }
 
-    const userRating = ditich.danhGiaNguoiDung?.find((dg) => dg.userId === userId);
-    if (userRating) {
-      userRating.diem = diem;
+    if (!diTich.danhGiaNguoiDung) {
+      diTich.danhGiaNguoiDung = [];
+    }
+
+    const danhGiaMoi: IDanhGiaNguoiDung = {
+      userId,
+      diem,
+      binhLuan,
+    };
+
+    const existingReviewIndex = diTich.danhGiaNguoiDung.findIndex(d => d.userId === userId);
+    if (existingReviewIndex !== -1) {
+      // Cập nhật đánh giá cũ
+      diTich.danhGiaNguoiDung[existingReviewIndex] = danhGiaMoi;
     } else {
-      ditich.danhGiaNguoiDung?.push({ userId, diem });
+      diTich.danhGiaNguoiDung.push(danhGiaMoi);
     }
 
-    const totalRating = ditich.danhGiaNguoiDung?.reduce((sum, dg) => sum + dg.diem, 0) || 0;
-    const avgRating = totalRating / (ditich.danhGiaNguoiDung?.length || 1);
+    const soNguoiDanhGia = diTich.danhGiaNguoiDung.length;
+    const tongDiem = diTich.danhGiaNguoiDung.reduce((sum, item) => sum + item.diem, 0);
+    const diemTrungBinh = tongDiem / soNguoiDanhGia;
 
-    ditich.danhGia = avgRating;
-    ditich.soNguoiDanhGia = ditich.danhGiaNguoiDung?.length || 0;
+    diTich.danhGia = diemTrungBinh;
+    diTich.soNguoiDanhGia = soNguoiDanhGia;
 
-    await ditich.save();
+    await diTich.save();
 
-    res.status(200).json({
-      message: "Đánh giá thành công",
-      danhGia: parseFloat(avgRating.toFixed(1)),
-      soNguoiDanhGia: ditich.soNguoiDanhGia,
+    res.json({
+      message: 'Đánh giá thành công',
+      diemTrungBinh,
+      danhGiaNguoiDung: diTich.danhGiaNguoiDung,
     });
-  } catch (error) {
-    const err = error as Error;
-    console.error("Lỗi đánh giá:", err.message);
-    res.status(500).json({ message: "Lỗi server", error: err.message });
+  } catch (err) {
+    console.error('❌ Lỗi khi đánh giá di tích:', err);
+    res.status(500).json({ error: 'Lỗi khi đánh giá di tích' });
   }
 };
 
+
+
+export const layDanhGiaDiTich = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const ditichId = req.params.id;
+    
+    const ditich = await DTTich.findById(ditichId);
+    if (!ditich) {
+      res.status(404).json({ message: 'Không tìm thấy di tích' });
+      return;
+    }
+
+    const danhGiaList = ditich.danhGiaNguoiDung || [];
+
+    const userIds = danhGiaList.map(dg => dg.userId);
+
+    const nguoiDungs = await NguoiDung.find({ _id: { $in: userIds } });
+
+    const danhGiaChiTiet = danhGiaList.map(dg => {
+      const user = nguoiDungs.find(u => (u._id as mongoose.Types.ObjectId).toString() === dg.userId);
+      return {
+        userId: dg.userId,
+        ten: user ? user.ten : 'Ẩn danh',
+        anhDaiDien: user ? user.anhDaiDien : null,
+        diem: dg.diem,
+        binhLuan: dg.binhLuan,
+      };
+    });
+
+    res.json({
+      danhGia: ditich.danhGia,
+      soNguoiDanhGia: ditich.soNguoiDanhGia,
+      chiTietDanhGia: danhGiaChiTiet,
+    });
+  } catch (err) {
+    console.error('Lỗi lấy đánh giá:', err);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+};
