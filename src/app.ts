@@ -16,12 +16,11 @@ import thongBaoRoutes from './routes/thongbaosukien.routes';
 import kienThucRoutes from './routes/kienthuc.routes';
 import timKiemRoutes from "./routes/timkiem.route";
 import baiVietRoutes from './routes/baiviet.routes';
-import danhGiaRoutes from "./routes/danhgia.routes";
 import noidungluutruRoutes from './routes/noidungluutru.routes'; 
-import { createEventNotifications } from './utils/notificationScheduler';  
+import { createEventNotifications  } from './utils/notificationScheduler';  
 import luotbinhluanRoutes from './routes/luotbinhluan.routes'; 
-import bandoRoutes from './routes/bando.routes';
 import luotthichRoutes from './routes/luotthich.routes';
+import bandoRoutes from './routes/bando.routes';
 
 dotenv.config();
 
@@ -56,18 +55,28 @@ app.use("/api/timkiem", timKiemRoutes);
 app.use('/api/baiViet', baiVietRoutes);
 app.use('/api/noidungluutru', noidungluutruRoutes);
 app.use('/api/luotbinhluan', luotbinhluanRoutes); 
-app.use('/api/bando', bandoRoutes);
 app.use('/api/luotthich', luotthichRoutes); 
-app.use("/api/danhgia", danhGiaRoutes);
+app.use('/api/bando', bandoRoutes);
+
+
 // Route test
 app.get('/', (req, res) => {
   res.send('🚀 API Travel đang chạy!');
 });
 
 // Lấy IP LAN của máy tính
+const networkInterfaces = os.networkInterfaces();
+let localIP = 'localhost';
 
+for (const iface of Object.values(networkInterfaces)) {
+  for (const config of iface || []) {
+    if (config.family === 'IPv4' && !config.internal) {
+      localIP = config.address;
+    }
+  }
+}
 
-let localIP = '192.168.74.61';
+// let localIP = '192.168.74.61';
 
 // Gọi hàm createEventNotifications ngay khi server khởi động
 mongoose.connection.once('open', () => {
@@ -75,7 +84,6 @@ mongoose.connection.once('open', () => {
 
   // ✅ Chạy ngay khi server khởi động
   createEventNotifications();
-
   // ✅ Thiết lập cron job chạy mỗi ngày lúc 0h (nửa đêm)
   cron.schedule('0 0 * * *', async () => {
     console.log('🔁 [CRON] Đang kiểm tra sự kiện để gửi thông báo...');

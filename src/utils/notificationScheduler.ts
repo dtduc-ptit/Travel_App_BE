@@ -2,6 +2,7 @@ import { SuKien } from '../models/sukien.model';
 import { NguoiDung } from '../models/nguoidung.model';
 import { ThongBaoSuKien } from '../models/thongbaosukien.model';
 import { Request, Response } from 'express';
+import { DTTich } from '../models/ditich.model';
 
 export const createEventNotifications = async (): Promise<void> => {
   try {

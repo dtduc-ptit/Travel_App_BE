@@ -1,8 +1,32 @@
 import { Request, Response } from 'express';
 import { SuKien } from '../models/sukien.model';
 import { Media } from '../models/media.model';
-import mongoose from "mongoose";
+import { NguoiDung } from '../models/nguoidung.model';
+import mongoose, { HydratedDocument } from 'mongoose';
 
+// Define the interface for danhGiaNguoiDung to match the schema
+interface IDanhGiaNguoiDung {
+  userId: string;
+  diem: number;
+  binhLuan: string;
+}
+
+// Define the interface for SuKien document to improve type safety
+interface ISuKien extends HydratedDocument<mongoose.Document> {
+  ten: string;
+  moTa?: string;
+  thoiGianBatDau: string;
+  thoiGianKetThuc?: string;
+  thoiGianCapNhat?: string;
+  diaDiem?: string;
+  danhGia: number;
+  soNguoiDanhGia: number;
+  danhGiaNguoiDung: IDanhGiaNguoiDung[];
+  luotXem: number;
+  huongDan?: string;
+  noiDungLuuTruId?: mongoose.Types.ObjectId;
+  media: mongoose.Types.ObjectId[];
+}
 
 export const getAllSuKien = async (req: Request, res: Response) => {
   try {
@@ -257,6 +281,7 @@ export const tangLuotXemSuKien = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Lỗi server khi tăng lượt xem' });
   }
 };
+
 export const searchSuKienByTen = async (req: Request, res: Response): Promise<void> => {
   try {
     const { q } = req.query;
@@ -266,11 +291,9 @@ export const searchSuKienByTen = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // Tìm các sự kiện có tên chứa chuỗi q (không phân biệt hoa thường)
     const regex = new RegExp(q, 'i');
     const suKiens = await SuKien.find({ ten: regex });
 
-    // Lấy media tương ứng
     const ids = suKiens.map(sk => sk._id.toString());
     const medias = await Media.find({
       doiTuong: 'SuKien',
@@ -299,7 +322,6 @@ export const getSuKienSapDienRa = async (req: Request, res: Response) => {
 
     const suKiens = await SuKien.find().sort({ thoiGianBatDau: 1 });
 
-    // Chuyển đổi chuỗi thoiGianBatDau => Date để so sánh
     const upcomingEvents = suKiens.filter(sk => {
       const [day, month, year] = sk.thoiGianBatDau.split('/');
       const eventDate = new Date(`${year}-${month}-${day}`);
@@ -330,12 +352,11 @@ export const getSuKienSapDienRa = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Lỗi khi lấy sự kiện sắp diễn ra' });
   }
 };
+
 export const getAllSuKienSorted = async (req: Request, res: Response) => {
   try {
-    // Lấy toàn bộ sự kiện
     const suKiens = await SuKien.find();
 
-    // Sắp xếp theo thời gian: chuyển string → Date để so sánh/sắp xếp
     const sortedSuKiens = suKiens
       .map(sk => {
         const [day, month, year] = sk.thoiGianBatDau.split('/');
@@ -344,23 +365,19 @@ export const getAllSuKienSorted = async (req: Request, res: Response) => {
       })
       .sort((a, b) => a.eventDate.getTime() - b.eventDate.getTime());
 
-    // Lấy danh sách ID
     const ids = sortedSuKiens.map(sk => sk._id);
 
-    // Tìm media image của các sự kiện
     const medias = await Media.find({
       doiTuong: 'SuKien',
       doiTuongId: { $in: ids },
       type: 'image',
     });
 
-    // Map media vào đúng sự kiện
     const mediaMap = new Map();
     medias.forEach(media => {
       mediaMap.set(media.doiTuongId.toString(), media.url);
     });
 
-    // Gắn imageUrl cho mỗi sự kiện
     const result = sortedSuKiens.map(sk => ({
       ...sk,
       imageUrl: mediaMap.get(sk._id.toString()) || null,
@@ -375,47 +392,107 @@ export const getAllSuKienSorted = async (req: Request, res: Response) => {
 
 export const danhGiaSuKien = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params; // ID sự kiện
-    const { diem, userId } = req.body; // Lấy điểm và userId từ body
+    const suKienId = req.params.id;
+    const { userId, diem, binhLuan } = req.body;
 
-    console.log('SuKien ID:', id);
-    console.log('Điểm đánh giá:', diem);
-    console.log('UserId:', userId);
-
-    if (!diem || typeof diem !== 'number' || diem < 1 || diem > 5) {
-      res.status(400).json({ message: "Điểm đánh giá phải là số từ 1 đến 5" });
+    // Kiểm tra xem sự kiện có tồn tại hay không
+    const suKien: ISuKien | null = await SuKien.findById(suKienId);
+    if (!suKien) {
+      res.status(404).json({ message: 'Không tìm thấy sự kiện' });
       return;
     }
 
-    const sukien = await SuKien.findById(id);
-    if (!sukien) {
-      res.status(404).json({ message: "Không tìm thấy sự kiện" });
+    // Kiểm tra điểm đánh giá hợp lệ (từ 1 đến 5)
+    if (diem < 1 || diem > 5) {
+      res.status(400).json({ message: 'Điểm đánh giá phải từ 1 đến 5' });
       return;
     }
 
-    const userRating = sukien.danhGiaNguoiDung?.find((dg) => dg.userId === userId);
-    if (userRating) {
-      userRating.diem = diem;
+    // Kiểm tra nếu danhGiaNguoiDung không tồn tại, gán mảng rỗng
+    if (!suKien.danhGiaNguoiDung) {
+      suKien.danhGiaNguoiDung = [];
+    }
+
+    // Tạo đánh giá mới của người dùng
+    const danhGiaMoi: IDanhGiaNguoiDung = {
+      userId,
+      diem,
+      binhLuan,
+    };
+
+    // Kiểm tra nếu người dùng đã đánh giá, thì cập nhật đánh giá cũ
+    const existingReviewIndex = suKien.danhGiaNguoiDung.findIndex(d => d.userId === userId);
+    if (existingReviewIndex !== -1) {
+      suKien.danhGiaNguoiDung[existingReviewIndex] = danhGiaMoi;
     } else {
-      sukien.danhGiaNguoiDung?.push({ userId, diem });
+      suKien.danhGiaNguoiDung.push(danhGiaMoi);
     }
 
-    const totalRating = sukien.danhGiaNguoiDung?.reduce((sum, dg) => sum + dg.diem, 0) || 0;
-    const avgRating = totalRating / (sukien.danhGiaNguoiDung?.length || 1);
+    // Cập nhật lại số lượng người đánh giá và điểm trung bình
+    const soNguoiDanhGia = suKien.danhGiaNguoiDung.length;
+    const tongDiem = suKien.danhGiaNguoiDung.reduce((sum, item) => sum + item.diem, 0);
+    const diemTrungBinh = tongDiem / soNguoiDanhGia;
 
-    sukien.danhGia = avgRating;
-    sukien.soNguoiDanhGia = sukien.danhGiaNguoiDung?.length || 0;
+    // Cập nhật điểm trung bình và số người đánh giá
+    suKien.danhGia = diemTrungBinh;
+    suKien.soNguoiDanhGia = soNguoiDanhGia;
 
-    await sukien.save();
+    // Lưu lại đánh giá vào sự kiện
+    await suKien.save();
 
-    res.status(200).json({
-      message: "Đánh giá sự kiện thành công",
-      danhGia: parseFloat(avgRating.toFixed(1)),
-      soNguoiDanhGia: sukien.soNguoiDanhGia,
+    // Trả về kết quả với điểm trung bình mới và danh sách đánh giá
+    res.json({
+      message: 'Đánh giá thành công',
+      diemTrungBinh,
+      danhGiaNguoiDung: suKien.danhGiaNguoiDung,
     });
-  } catch (error) {
-    const err = error as Error;
-    console.error("Lỗi đánh giá sự kiện:", err.message);
-    res.status(500).json({ message: "Lỗi server", error: err.message });
+  } catch (err) {
+    console.error('❌ Lỗi khi đánh giá sự kiện:', err);
+    res.status(500).json({ error: 'Lỗi khi đánh giá sự kiện' });
+  }
+};
+
+export const layDanhGiaSuKien = async (req: Request, res: Response): Promise<void> => {
+  try {
+   
+    const suKienId = req.params.id;
+    
+    // Tìm sự kiện theo id
+    const suKien: ISuKien | null = await SuKien.findById(suKienId);
+    if (!suKien) {
+      res.status(404).json({ message: 'Không tìm thấy sự kiện' });
+      return;
+    }
+
+    // Lấy danh sách đánh giá
+    const danhGiaList = suKien.danhGiaNguoiDung || [];
+
+    // Lấy tất cả userIds từ các đánh giá
+    const userIds = danhGiaList.map(dg => dg.userId);
+
+    // Lấy thông tin người dùng từ database
+    const nguoiDungs = await NguoiDung.find({ _id: { $in: userIds } });
+
+    // Gộp thông tin đánh giá và người dùng
+    const danhGiaChiTiet = danhGiaList.map(dg => {
+      const user = nguoiDungs.find(u => (u._id as mongoose.Types.ObjectId).toString() === dg.userId);
+      return {
+        userId: dg.userId,
+        ten: user ? user.ten : 'Ẩn danh',
+        anhDaiDien: user ? user.anhDaiDien : null,
+        diem: dg.diem,
+        binhLuan: dg.binhLuan,
+      };
+    });
+
+    // Trả về phản hồi JSON cho client
+    res.json({
+      danhGia: suKien.danhGia,
+      soNguoiDanhGia: suKien.soNguoiDanhGia,
+      chiTietDanhGia: danhGiaChiTiet,
+    });
+  } catch (err) {
+    console.error('Lỗi lấy đánh giá sự kiện:', err);
+    res.status(500).json({ message: 'Lỗi server' });
   }
 };

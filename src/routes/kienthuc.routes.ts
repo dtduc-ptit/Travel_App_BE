@@ -9,7 +9,7 @@ getDanhSachKienThucTheoLoai,
   updateKienThuc,
   getKienThucXemNhieu,
   getKienThucById,
-  tangLuotXemKienThuc
+  tangLuotXemKienThuc,
 } from '../controllers/kienthuc.controller';
 
 const router = express.Router();
@@ -24,5 +24,4 @@ router.get('/:id', getKienThucById);
 router.post('/', createKienThuc);
 router.patch('/:id', updateKienThuc);
 router.patch('/:id/luotxem', tangLuotXemKienThuc);
-
 export default router;
