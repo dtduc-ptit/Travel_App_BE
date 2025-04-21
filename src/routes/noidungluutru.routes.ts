@@ -4,7 +4,8 @@ import {
     getDiTichDaLuu,
     deleteNoiDungLuuTru,
     getPhongTucDaLuu,
-    getSuKienDaLuu
+    getSuKienDaLuu,
+    getNoiDungDaLuu
 } from '../controllers/noidungluutru.controller';
 const express = require('express');
 const router = express.Router();
@@ -15,6 +16,7 @@ router.get('/kiemtra', checkNoiDungLuuTru);
 router.get('/ditich', getDiTichDaLuu);
 router.get('/phongtuc', getPhongTucDaLuu);
 router.get('/sukien', getSuKienDaLuu);
+router.get('/', getNoiDungDaLuu);
 
 
 export default router;

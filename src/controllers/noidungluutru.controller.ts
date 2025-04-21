@@ -4,6 +4,7 @@ import { DTTich } from '../models/ditich.model';
 import { Media } from '../models/media.model';
 import { PhongTuc } from '../models/phongtuc.model';
 import { SuKien } from '../models/sukien.model';
+import { KienThuc } from '../models/kienthuc.model';
 
 
 export const createNoiDungLuuTru = async (req: Request, res: Response): Promise<void> => {
@@ -19,7 +20,7 @@ export const createNoiDungLuuTru = async (req: Request, res: Response): Promise<
     }
 
     // Kiểm tra loaiNoiDung có hợp lệ không
-    const validLoaiNoiDung = ['SuKien', 'DiTich', 'PhongTuc'];
+    const validLoaiNoiDung = ['SuKien', 'DiTich', 'PhongTuc','kienThuc'];
     if (!validLoaiNoiDung.includes(loaiNoiDung)) {
       res.status(400).json({
         message: `loaiNoiDung không hợp lệ. Phải là một trong: ${validLoaiNoiDung.join(', ')}`,
@@ -237,5 +238,85 @@ export const deleteNoiDungLuuTru = async (req: Request, res: Response): Promise<
     res.status(200).json({ message: 'Xoá thành công', deleted });
   } catch (err: any) {
     res.status(500).json({ message: 'Lỗi server', error: err.message });
+  }
+};
+
+
+export const getNoiDungDaLuu = async (req: Request, res: Response) => {
+  try {
+    const { nguoiDung, loaiNoiDung } = req.query;
+
+    // Validate input
+    if (!nguoiDung || !loaiNoiDung) {
+      return res.status(400).json({
+        success: false,
+        message: 'Thiếu tham số bắt buộc: nguoiDung và loaiNoiDung'
+      });
+    }
+
+    // Kiểm tra loại nội dung hợp lệ
+    const validTypes = ['kienThuc', 'SuKien', 'DiTich', 'PhongTuc'];
+    const loai = loaiNoiDung.toString();
+    
+    if (!validTypes.includes(loai)) {
+      return res.status(400).json({
+        success: false,
+        message: `Loại nội dung không hợp lệ. Chấp nhận: ${validTypes.join(', ')}`
+      });
+    }
+
+    // Xác định model tương ứng
+    let model;
+    switch (loai) {
+      case 'kienThuc':
+        model = KienThuc;
+        break;
+      case 'SuKien':
+        model = SuKien;
+        break;
+      case 'DiTich':
+        model = DTTich;
+        break;
+      case 'PhongTuc':
+        model = PhongTuc;
+        break;
+      default:
+        return res.status(400).json({ success: false, message: 'Loại không hợp lệ' });
+    }
+
+    // Truy vấn database với populate thủ công
+    const savedContents = await NoiDungLuuTru.find({
+      nguoiDung: nguoiDung.toString(),
+      loaiNoiDung: loai
+    })
+    .populate<{
+      idNoiDung: { tieuDe: string; hinhAnh: string[]; _id: string } | null;
+    }>({
+      path: 'idNoiDung',
+      model: model,
+      select: 'tieuDe hinhAnh'
+    })
+    .lean();
+
+    // Format response với kiểm tra an toàn
+    const formattedResults = savedContents.map(item => ({
+      _id: item._id,
+      tieuDe: item.idNoiDung?.tieuDe || 'Không có tiêu đề',
+      hinhAnh: item.idNoiDung?.hinhAnh || [],
+      idNoiDung: item.idNoiDung?._id || null,
+      thoiGianLuu: item.thoiGianLuu
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: formattedResults
+    });
+
+  } catch (error) {
+    console.error('Lỗi khi lấy nội dung đã lưu:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lỗi server'
+    });
   }
 };

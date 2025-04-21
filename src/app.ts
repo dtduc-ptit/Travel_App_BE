@@ -22,6 +22,7 @@ import luotbinhluanRoutes from './routes/luotbinhluan.routes';
 import bandoRoutes from './routes/bando.routes';
 import luotthichRoutes from './routes/luotthich.routes';
 
+
 dotenv.config();
 
 const app: Application = express();
@@ -64,18 +65,9 @@ app.get('/', (req, res) => {
 });
 
 // Lấy IP LAN của máy tính
-const networkInterfaces = os.networkInterfaces();
-let localIP = 'localhost';
 
-for (const iface of Object.values(networkInterfaces)) {
-  for (const config of iface || []) {
-    if (config.family === 'IPv4' && !config.internal) {
-      localIP = config.address;
-    }
-  }
-}
 
-// let localIP = '192.168.74.61';
+let localIP = '192.168.74.61';
 
 // Gọi hàm createEventNotifications ngay khi server khởi động
 mongoose.connection.once('open', () => {
