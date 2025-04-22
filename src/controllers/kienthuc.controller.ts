@@ -202,4 +202,32 @@ export const getMoiCapNhatKienThuc = async (req: Request, res: Response) => {
   }
 };
 
+export const searchKienThuc = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { query } = req.query;
+
+    console.log("Đã nhận yêu cầu tìm kiếm với query:", query);
+
+    if (!query || typeof query !== "string") {
+      res.status(400).json({ message: "Thiếu từ khóa tìm kiếm" });
+      return;
+    }
+
+    const regex = new RegExp(query, "i"); // Dùng tùy chọn "i" để bỏ qua hoa/thường
+
+    const kienThuc = await KienThuc.find({
+      tieuDe: { $regex: regex },
+      daDuyet: true,
+    })
+      .sort({ createdAt: -1 });
+
+    console.log("Kết quả tìm kiếm:", kienThuc);
+
+    res.status(200).json(kienThuc);
+  } catch (error) {
+    console.error("Chi tiết lỗi tìm kiếm:", error);
+    res.status(500).json({ message: "Đã xảy ra lỗi khi tìm kiếm" });
+  }
+};
+
 

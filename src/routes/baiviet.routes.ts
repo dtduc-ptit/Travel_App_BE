@@ -5,13 +5,16 @@ import {
   getBaiVietById,
   updateBaiViet,
   tangLuotThichBaiViet,
-  tangLuotBinhLuanBaiViet
+  tangLuotBinhLuanBaiViet,
+  searchBaiViet
 } from '../controllers/baiviet.controller';
 
 const router = express.Router();
 
 // GET /api/baiviet
 router.get('/', getDanhSachBaiViet);
+
+router.get('/search', searchBaiViet);
 
 // GET /api/baiviet/:id
 router.get('/:id', getBaiVietById);
@@ -27,5 +30,7 @@ router.patch('/:id/luotthich', tangLuotThichBaiViet);
 
 // PATCH /api/baiviet/:id/luotbinhluan
 router.patch('/:id/luotbinhluan', tangLuotBinhLuanBaiViet);
+
+
 
 export default router;

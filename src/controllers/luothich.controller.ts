@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { LuotThich } from '../models/luotthich.model'; // Mô hình lượt thích
 import { BaiViet } from '../models/baiviet.model';   // Mô hình bài viết
 import mongoose from 'mongoose';
+import { createLikeNotification } from './thongbao.controller';
+import { deleteLikeNotification } from './thongbao.controller';
 
 // Hàm tạo lượt thích
 export const addLike = async (req: Request, res: Response): Promise<void> => {
@@ -26,6 +28,7 @@ export const addLike = async (req: Request, res: Response): Promise<void> => {
     });
 
     await newLike.save();
+    await createLikeNotification(nguoiDungId, baiVietId);
 
     // Cập nhật số lượt thích trong bài viết
     await BaiViet.findByIdAndUpdate(baiVietId, {
@@ -62,6 +65,7 @@ export const removeLike = async (req: Request, res: Response): Promise<void> => 
     if (existingLike) {
       await LuotThich.findByIdAndDelete(existingLike._id);
     }
+    await deleteLikeNotification(nguoiDungId, baiVietId);
 
     // Cập nhật số lượt thích trong bài viết
     await BaiViet.findByIdAndUpdate(baiVietId, {

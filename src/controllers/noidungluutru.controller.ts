@@ -5,6 +5,7 @@ import { Media } from '../models/media.model';
 import { PhongTuc } from '../models/phongtuc.model';
 import { SuKien } from '../models/sukien.model';
 import { KienThuc } from '../models/kienthuc.model';
+import { BaiViet } from '../models/baiviet.model';
 
 
 export const createNoiDungLuuTru = async (req: Request, res: Response): Promise<void> => {
@@ -20,7 +21,7 @@ export const createNoiDungLuuTru = async (req: Request, res: Response): Promise<
     }
 
     // Kiểm tra loaiNoiDung có hợp lệ không
-    const validLoaiNoiDung = ['SuKien', 'DiTich', 'PhongTuc','kienThuc'];
+    const validLoaiNoiDung = ['SuKien', 'DiTich', 'PhongTuc','kienThuc', 'baiViet'];
     if (!validLoaiNoiDung.includes(loaiNoiDung)) {
       res.status(400).json({
         message: `loaiNoiDung không hợp lệ. Phải là một trong: ${validLoaiNoiDung.join(', ')}`,
@@ -255,7 +256,7 @@ export const getNoiDungDaLuu = async (req: Request, res: Response) => {
     }
 
     // Kiểm tra loại nội dung hợp lệ
-    const validTypes = ['kienThuc', 'SuKien', 'DiTich', 'PhongTuc'];
+    const validTypes = ['kienThuc', 'SuKien', 'DiTich', 'PhongTuc', 'baiViet'];
     const loai = loaiNoiDung.toString();
     
     if (!validTypes.includes(loai)) {
@@ -279,6 +280,9 @@ export const getNoiDungDaLuu = async (req: Request, res: Response) => {
         break;
       case 'PhongTuc':
         model = PhongTuc;
+        break;
+      case 'baiViet':
+        model = BaiViet;
         break;
       default:
         return res.status(400).json({ success: false, message: 'Loại không hợp lệ' });

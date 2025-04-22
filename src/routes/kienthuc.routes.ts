@@ -10,6 +10,7 @@ getDanhSachKienThucTheoLoai,
   getKienThucXemNhieu,
   getKienThucById,
   tangLuotXemKienThuc,
+  searchKienThuc,
 } from '../controllers/kienthuc.controller';
 
 const router = express.Router();
@@ -19,9 +20,11 @@ router.get('/noibat', getNoiBatKienThuc);
 router.get('/phobien', getPhoBienKienThuc);
 router.get('/xemnhieu', getKienThucXemNhieu);
 router.get('/docdao', getDocDaoKienThuc);
+router.get('/search', searchKienThuc);
 router.get('/moicapnhat', getMoiCapNhatKienThuc);
 router.get('/:id', getKienThucById);
 router.post('/', createKienThuc);
 router.patch('/:id', updateKienThuc);
 router.patch('/:id/luotxem', tangLuotXemKienThuc);
+
 export default router;

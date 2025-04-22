@@ -22,6 +22,7 @@ import luotbinhluanRoutes from './routes/luotbinhluan.routes';
 import luotthichRoutes from './routes/luotthich.routes';
 import bandoRoutes from './routes/bando.routes';
 
+
 dotenv.config();
 
 const app: Application = express();
@@ -49,8 +50,8 @@ app.use('/api/nguoidung', nguoidungRoutes);
 app.use('/api/ditich', ditichRoutes);
 app.use('/api/sukien', sukienRoutes);
 app.use('/api/lichtrinh', lichtrinhRoutes);
-app.use('/api/kienthuc', kienThucRoutes);
-app.use('/api/thongbao', thongBaoRoutes);
+app.use("/api/kienthuc", kienThucRoutes);
+app.use("/api/thongbao", thongBaoRoutes);
 app.use("/api/timkiem", timKiemRoutes);
 app.use('/api/baiViet', baiVietRoutes);
 app.use('/api/noidungluutru', noidungluutruRoutes);
@@ -59,24 +60,27 @@ app.use('/api/luotthich', luotthichRoutes);
 app.use('/api/bando', bandoRoutes);
 
 
+
+
+
 // Route test
 app.get('/', (req, res) => {
   res.send('🚀 API Travel đang chạy!');
 });
 
 // Lấy IP LAN của máy tính
-const networkInterfaces = os.networkInterfaces();
-let localIP = 'localhost';
+// const networkInterfaces = os.networkInterfaces();
+// let localIP = 'localhost';
 
-for (const iface of Object.values(networkInterfaces)) {
-  for (const config of iface || []) {
-    if (config.family === 'IPv4' && !config.internal) {
-      localIP = config.address;
-    }
-  }
-}
+// for (const iface of Object.values(networkInterfaces)) {
+//   for (const config of iface || []) {
+//     if (config.family === 'IPv4' && !config.internal) {
+//       localIP = config.address;
+//     }
+//   }
+// }
 
-// let localIP = '192.168.74.61';
+let localIP = '192.168.26.61';
 
 // Gọi hàm createEventNotifications ngay khi server khởi động
 mongoose.connection.once('open', () => {

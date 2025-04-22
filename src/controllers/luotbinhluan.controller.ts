@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { LuotBinhLuan } from '../models/luotbinhluan.model';
 import { BaiViet } from '../models/baiviet.model';
+import { createCommentNotification } from './thongbao.controller';
 
 export const createBinhLuan = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -15,6 +16,8 @@ export const createBinhLuan = async (req: Request, res: Response): Promise<void>
 
     // Lưu bình luận vào cơ sở dữ liệu
     const savedBinhLuan = await binhLuan.save();
+
+    await createCommentNotification(nguoiDung, baiViet, noiDung);
 
     // Cập nhật bài viết để thêm _id của bình luận vào trường luotBinhLuan
     const updatedBaiViet = await BaiViet.findByIdAndUpdate(
